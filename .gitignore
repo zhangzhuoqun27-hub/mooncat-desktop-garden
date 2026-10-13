@@ -1,0 +1,30 @@
+# Generated application and SDK packages
+/dist/
+/desktop/sdk/
+/desktop/sdk-stage-*/
+/desktop/*.exe
+/desktop/*.pdb
+/desktop/*.nupkg
+/desktop/garden-assets.zip
+/desktop/assets.sha256
+/desktop/mooncat.ico
+
+# Optional artwork tooling
+/node_modules/
+npm-debug.log*
+
+# Local user data / verification profiles
+save-profile/
+test-profile*/
+desktop-window.json
+*.log
+*.tmp
+
+# Private configuration and credentials
+.env
+.env.*
+.openai/
+.codex/
+.sites/
+.DS_Store
+Thumbs.db

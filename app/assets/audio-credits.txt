@@ -1,0 +1,15 @@
+MOONCAT AUDIO
+
+Music: Original 16-bar generative score composed for Mooncat Night Voyage, 66 BPM.
+Instruments: original modal struck-string piano synthesis, felt-hammer transient,
+warm harmonic pads, stereo room impulse and rhythmic delay. No third-party music samples.
+
+Cat recording: "Cat Meow" by qubodup, derived from "Cat Call (Meow)" by Jofae.
+Source: https://freesound.org/people/qubodup/sounds/813119/
+Bundled preview: https://cdn.freesound.org/previews/813/813119_71257-hq.mp3
+License: Creative Commons Zero (CC0 1.0), public-domain dedication.
+License URL: https://creativecommons.org/publicdomain/zero/1.0/
+Local file: meow.mp3
+The Freesound source lists 0.455 seconds, mono, and CC0.
+Playback applies a gentle fade and small pitch variation. Attribution is included
+as courtesy; CC0 does not require attribution.

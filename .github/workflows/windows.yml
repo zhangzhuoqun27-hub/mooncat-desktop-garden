@@ -1,0 +1,90 @@
+name: Windows build
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-2022
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: powershell
+    steps:
+      - name: Check out source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Check JavaScript syntax
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Get-ChildItem -LiteralPath .\app -Filter *.js | ForEach-Object {
+            & node --check $_.FullName
+            if ($LASTEXITCODE -ne 0) { throw ('Syntax check failed: ' + $_.Name) }
+          }
+          & node --check .\scripts\draw-mooncat.cjs
+          if ($LASTEXITCODE -ne 0) { throw 'Artwork script syntax check failed.' }
+      - name: Obtain verified SDK and build
+        run: |
+          & .\desktop\install-sdk.ps1
+          & .\desktop\build.ps1 -OutputPath .\dist\Mooncat.exe
+          Copy-Item -LiteralPath .\LICENSE -Destination .\dist\LICENSE
+          Copy-Item -LiteralPath .\THIRD_PARTY_NOTICES.md -Destination .\dist\THIRD_PARTY_NOTICES.md
+          $taskHash = (Get-FileHash -LiteralPath .\dist\Mooncat.exe -Algorithm SHA256).Hash.ToLowerInvariant()
+          [IO.File]::WriteAllText((Join-Path $PWD 'dist\SHA256SUMS.txt'),($taskHash + '  Mooncat.exe' + [Environment]::NewLine),[Text.Encoding]::ASCII)
+      - name: Upload Windows build
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: Mooncat-windows-x64
+          path: dist/
+          if-no-files-found: error
+          retention-days: 30
+
+  release:
+    if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
+    needs: build
+    runs-on: windows-2022
+    timeout-minutes: 10
+    permissions:
+      actions: read
+      contents: write
+    steps:
+      - name: Download and publish build
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MOONCAT_REF_TYPE: ${{ github.ref_type }}
+          MOONCAT_REF_NAME: ${{ github.ref_name }}
+          MOONCAT_REPOSITORY: ${{ github.repository }}
+          MOONCAT_COMMIT: ${{ github.sha }}
+        run: |
+          $taskIsTag = $env:MOONCAT_REF_TYPE -eq 'tag'
+          $taskTag = if ($taskIsTag) { $env:MOONCAT_REF_NAME } else { 'v0.1.0' }
+          gh release view $taskTag --repo $env:MOONCAT_REPOSITORY 2>$null
+          if ($LASTEXITCODE -eq 0) {
+            Write-Output ('Release already exists; retaining its published assets: ' + $taskTag)
+            exit 0
+          }
+          if (!$taskIsTag) {
+            gh api ('repos/' + $env:MOONCAT_REPOSITORY + '/git/ref/tags/' + $taskTag) 2>$null
+            if ($LASTEXITCODE -eq 0) {
+              Write-Output ('Tag already exists; initial release must be published explicitly: ' + $taskTag)
+              exit 0
+            }
+          }
+          gh run download $env:GITHUB_RUN_ID --repo $env:MOONCAT_REPOSITORY --name Mooncat-windows-x64 --dir release-files
+          if ($LASTEXITCODE -ne 0) { throw 'Build artifact download failed.' }
+          $taskAssets = Get-ChildItem -LiteralPath release-files -File | Select-Object -ExpandProperty FullName
+          if ($taskIsTag) {
+            gh release create $taskTag @taskAssets --repo $env:MOONCAT_REPOSITORY --verify-tag --generate-notes --title ('Mooncat ' + $taskTag)
+          } else {
+            gh release create $taskTag @taskAssets --repo $env:MOONCAT_REPOSITORY --target $env:MOONCAT_COMMIT --generate-notes --title ('Mooncat ' + $taskTag)
+          }
+          if ($LASTEXITCODE -ne 0) { throw 'Release publication failed.' }
