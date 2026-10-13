@@ -2,6 +2,8 @@
 
 This is a Windows x64 desktop host for the original offline Mooncat garden. The output is one executable with its HTML/CSS/JavaScript, artwork, audio and Microsoft WebView2 SDK redistributables embedded. The executable does not start a web server or open an external browser.
 
+The current source builds **Mooncat v0.2.1** for Windows x64. Download the executable and checksums from the repository's v0.2.1 Release.
+
 ## Build on Windows
 
 Requirements: Windows 10/11 x64, .NET Framework 4.8, PowerShell, and `curl.exe` (included with current Windows). The build uses the framework's C# compiler at `C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe`; Visual Studio, Node.js and an SDK-wide installation are not needed.
@@ -23,9 +25,15 @@ The Microsoft **WebView2 Evergreen Runtime** and .NET Framework 4.8 must be inst
 
 First launch extracts versioned assets and SDK files into `%LOCALAPPDATA%\Mooncat\MoonGarden`. Garden progress, wishes and audio preferences live in the persistent `save-profile` WebView2 folder. Native position/pin/cat preferences live in `desktop-window.json`. Asset updates use an archive-hash directory and retain the same `https://mooncat.local` origin and save profile. No data deletion or reset occurs during updates.
 
-The default is a 350 × 440 logical-pixel garden near the screen edge. The original cat also walks above the taskbar without taking keyboard focus. The tray can show the garden, open the full scene, toggle the roaming cat or exit. Closing the garden hides it to the tray. Double-clicking the roaming cat shows the garden; its right-click menu offers pause, show, hide and exit. There is no automatic startup registration.
+The default is the fullscreen observatory, with the opening music fading in and no native taskbar cat. “月球小花园” opens a large management dialog within the same home page and operates on the shared save. “出趟远门” opens the 350 × 440 logical-pixel garden together with Winesun's independent native transparent taskbar window. “返航” returns to the fullscreen scene and hides the native cat.
 
-Compact garden and 170 × 190 cat modes use one live widget page. Native bounds interpolate for 320 ms while the page crossfades. The current right/top edge stays fixed. Rapid reverse requests use the current bounds, and reduced-motion preferences remove the animation. Expanding to the observatory navigates to the full offline page.
+Winesun's short legs alternate in diagonal pairs. The cat can be dragged, then falls to the taskbar with a small elastic landing. It does not take keyboard focus while walking. Cat-to-garden morph animations have been removed; showing, minimizing and restoring the garden changes visibility directly.
+
+The garden presents one minimize button, and the application's taskbar button remains present. `hide`, `close`, and `minimize` minimize the main window. During desktop accompaniment, the taskbar cat remains visible while the garden is minimized; clicking the application taskbar button or double-clicking the cat restores the garden beside it. The tray remains an auxiliary way to open the home or garden and to exit. There is no automatic startup registration. F11 toggles fullscreen; Escape first closes an open home dialog, then exits fullscreen when no dialog is open.
+
+The garden uses `widget.html`; the observatory uses `index.html`. Home management loads the garden into its dialog without navigating to the desktop widget. Returning between home and widget restores saved music preferences and playback positions. Native background music remains enabled while the main window is minimized.
+
+Normal updates retain user data. Exit the running program, replace the EXE and launch the new version; it continues using the same profile and offline origin, preserving the garden, wishes and audio preferences. Updating does not automatically reset progress.
 
 ## Isolated verification
 
@@ -34,12 +42,13 @@ These options are intended for development. Always supply an absolute workspace 
 ```powershell
 & .\dist\Mooncat.exe --self-test --test-profile C:\path\to\test-profile
 & .\dist\Mooncat.exe --smoke-test --test-profile C:\path\to\test-profile
+& .\dist\Mooncat.exe --smoke-test --test-mode compact --test-profile C:\path\to\test-profile
 & .\dist\Mooncat.exe --smoke-test --test-mode peek --test-profile C:\path\to\test-profile
 & .\dist\Mooncat.exe --smoke-test --test-mode expanded --test-profile C:\path\to\test-profile
 & .\dist\Mooncat.exe --smoke-test --transition-test --roamer-test --test-profile C:\path\to\test-profile
 ```
 
-Resource self-test checks the embedded SHA256, safe ZIP paths, extracted files, widget/script references, sprite grid and installed runtime. Native smoke tests use a window outside the screen, run the actual WebView2 renderer, record JavaScript errors and viewport dimensions, then exit. Transition tests exercise native host messages, interpolated window sizes, rapid reversal, reduced motion and retention of the same JavaScript document. Roamer tests render all eight frames through Windows per-pixel-alpha `UpdateLayeredWindow`.
+Resource self-test checks the embedded SHA256, safe ZIP paths, extracted files, widget/script references, sprite grid and installed runtime. Native smoke tests use a window outside the screen, run the actual WebView2 renderer, record JavaScript errors and viewport dimensions, then exit. Expanded-mode smoke testing also verifies that the startup AudioContext advances without interaction. Mode tests exercise a home without the taskbar cat, garden-and-cat coexistence, minimization with the taskbar button retained, restoration and fullscreen return. Roamer tests render all eight frames through Windows per-pixel-alpha `UpdateLayeredWindow` and verify taskbar alignment, gravity and elastic landing.
 
 Results are written inside the supplied profile as `self-test.log`, `runtime-test.log`, `runtime-trace.log`, or `last-error.log`. The GUI executable's process exit code is 0 on success. Some restricted execution sandboxes prevent WebView2 subprocess initialization; native testing needs normal local execution permissions.
 
@@ -49,7 +58,7 @@ Add `--capture-preview C:\path\to\preview.png` to a smoke test to capture the ap
 
 Only messages from the exact trusted `https://mooncat.local` origin are accepted. The app blocks HTTP(S) resource requests to other hosts and external navigation. Messages use `window.chrome.webview.postMessage({type: '...'})`.
 
-Supported types: `ready`, `drag`, `peek`, `compact`, `expand`, `pin`, `hide`, `minimize`, `close`, `toggle-fullscreen`, and `motion-preference` with a Boolean `reduced` value. The host sends `mode-transition` (`pet`, `duration`) and `window-state` (`compact`, `pet`, `pinned`). The native bridge grants no filesystem, shell, arbitrary URL or execution interface.
+Supported types: `ready`, `drag`, `compact` (garden and cat), `expand` (observatory without native cat), `pin`, `hide`, `minimize`, `close`, `toggle-fullscreen`, and `motion-preference` with a Boolean `reduced` value. The legacy `peek` message remains accepted by the host, but the garden exposes only one minimize button. The host sends `window-state` with mode names `expanded`, `garden`, `cat`, plus `compact`, `pet`, `pinned`, `fullscreen`, `minimized`, `catVisible`, `transitioning`, `startup`, `autoplay` and `musicResumeAllowed`. Mode changes no longer emit a morph animation. The native bridge grants no filesystem, shell, arbitrary URL or execution interface.
 
 ## Licensing and publishing
 

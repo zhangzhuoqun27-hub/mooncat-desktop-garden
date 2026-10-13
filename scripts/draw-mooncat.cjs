@@ -37,40 +37,79 @@ ${head}
 <circle cx="559" cy="584" r="3" fill="${rose}"/><circle cx="215" cy="270" r="3.5" fill="${olive}"/><circle cx="600" cy="395" r="2.5" fill="${ochre}"/>
 </g></svg>`;
 
-function leg(x, phase, tint, near) {
-  const swing = Math.sin(phase)*11;
-  const lift = Math.max(0,Math.cos(phase))*9;
-  const footx = x+swing, y=215-lift;
-  return `<path d="M${x-8} 180 Q${x-9+swing*.25} 194 ${footx-9} ${y-5} Q${footx-11} ${y+2} ${footx+1} ${y+2} L${footx+9} ${y+2} Q${footx+15} ${y-4} ${footx+8} ${y-8} L${x+10} 180Z" fill="${tint}" stroke="${ink}" stroke-width="2.4"/>${near?`<path d="M${footx+1} ${y-3} L${footx+1} ${y+1} M${footx+7} ${y-3} L${footx+7} ${y}" fill="none" stroke="${ink}" stroke-width="1.7"/>`:''}`;
+const number=v=>Number(v.toFixed(2));
+// Right-facing anatomy: the cat's left side is nearest the viewer.
+// LF = left foreleg / near front; RH = right hindleg / far hind: phase 0.
+// RF = right foreleg / far front; LH = left hindleg / near hind: phase PI.
+// Each diagonal moves together; both same-side front/hind pairs oppose.
+const limbs=[
+  {name:'RH',label:'right hind / far hind',hip:100,offset:0,near:false,hind:true},
+  {name:'RF',label:'right fore / far front',hip:172,offset:Math.PI,near:false,hind:false},
+  {name:'LH',label:'left hind / near hind',hip:88,offset:Math.PI,near:true,hind:true},
+  {name:'LF',label:'left fore / near front',hip:185,offset:0,near:true,hind:false}
+];
+function leg(limb, phase, bob) {
+  const cycle=((phase+limb.offset)/(Math.PI*2)%1+1)%1;
+  const stance=cycle<.6;
+  const u=stance?cycle/.6:(cycle-.6)/.4;
+  const swing=stance?13-26*u:-13+26*(.5-.5*Math.cos(u*Math.PI));
+  const lift=stance?0:Math.sin(u*Math.PI)*12;
+  const footx=number(limb.hip+swing), sole=number(230-lift);
+  const hipY=number(194+bob), kneeX=number(limb.hip+swing*.34+(limb.hind?3:-2));
+  const kneeY=number(216-lift*.48), tint=limb.near?cream:'#e9e0cc';
+  // The torso covers these generous rounded hip caps. Only a short bent calf
+  // and a little oval paw show below the belly; no detached rectangular limbs.
+  return `<g data-limb="${limb.name}" data-anatomy="${limb.label}" data-phase="${limb.offset===0?'0':'PI'}" data-stance="${stance}" data-sole="${sole}">
+    <path d="M${limb.hip-9} ${hipY} Q${kneeX-10} ${kneeY-4} ${footx-6} ${sole-8}
+      C${footx-12} ${sole-6} ${footx-12} ${sole} ${footx-4} ${sole}
+      L${footx+9} ${sole} Q${footx+16} ${sole} ${footx+13} ${sole-5}
+      Q${footx+11} ${sole-9} ${footx+4} ${sole-9}
+      Q${kneeX+8} ${kneeY-2} ${limb.hip+9} ${hipY}Z" fill="${tint}" stroke="${ink}" stroke-width="2.35"/>
+    ${limb.near?`<path d="M${footx+2} ${sole-4} L${footx+2} ${sole-1.5} M${footx+8} ${sole-4} L${footx+8} ${sole-1.5}" fill="none" stroke="${ink}" stroke-width="1.35"/>`:''}
+  </g>`;
 }
 function walker(i) {
-  const phase=i*Math.PI/4, tail=Math.sin(phase)*4, bob=Math.sin(phase*2)*.6;
-  return `<g transform="translate(${(i%4)*256} ${Math.floor(i/4)*256})" stroke-linecap="round" stroke-linejoin="round">
-  <g transform="translate(0 ${bob.toFixed(2)})">
-  <path d="M90 161 C56 163 41 141 44 ${119+tail} C46 ${103+tail} 58 ${98+tail} 67 ${108+tail}" fill="none" stroke="${ink}" stroke-width="21"/>
-  <path d="M90 161 C56 163 41 141 44 ${119+tail} C46 ${103+tail} 58 ${98+tail} 67 ${108+tail}" fill="none" stroke="${cream}" stroke-width="16"/>
-  ${leg(109,phase+Math.PI,pale,false)}${leg(166,phase,pale,false)}
-  <path d="M89 140 C111 124 150 123 174 137 C193 148 197 165 186 183 Q176 199 142 196 L107 193 Q79 188 78 169 Q76 150 89 140Z" fill="${cream}" stroke="${ink}" stroke-width="2.6"/>
-  <path d="M114 161 Q122 150 143 153 Q166 157 169 181 Q147 192 121 182Z" fill="#efdfc6"/>
-  ${leg(95,phase,toast,true)}${leg(174,phase+Math.PI,cream,true)}
-  <path d="M140 135 Q126 124 132 102 L137 75 Q139 61 149 76 L158 86 Q167 78 184 83 L198 71 Q208 65 206 80 L205 94 Q224 106 220 125 Q214 145 188 150 Q159 154 140 135Z" fill="${cream}" stroke="${ink}" stroke-width="2.6"/>
-  <path d="M140 78 L151 92 L140 98Z M201 77 L190 88 L201 92Z" fill="${rose}" opacity=".65"/>
-  <path d="M137 133 Q163 150 192 145 L190 156 Q160 161 139 144Z" fill="${ochre}" stroke="${ink}" stroke-width="2.1"/>
-  <path d="M161 155 L154 176 L165 179 L174 159Z" fill="${ochre}" stroke="${ink}" stroke-width="2.1"/>
-  <ellipse cx="180" cy="108" rx="2.5" ry="3.2" fill="${ink}"/><ellipse cx="207" cy="108" rx="1.8" ry="2.8" fill="${ink}"/>
-  <path d="M174 98 Q181 96 184 98" fill="none" stroke="${ink}" stroke-width="1.7"/>
-  <ellipse cx="174" cy="119" rx="8" ry="4" fill="${rose}" opacity=".4"/>
-  <path d="M210 119 L216 119 L213 123Z" fill="${rose}"/>
-  <path d="M212 124 Q206 129 201 125" fill="none" stroke="${ink}" stroke-width="1.8"/>
-  <path d="M191 122 L182 120 M193 128 L184 130" fill="none" stroke="${ink}" stroke-width="1.6"/>
-  <path d="M145 163 L148 168 L154 169 L150 173 L150 179 L145 176 L140 179 L141 173 L137 169 L143 168Z" fill="${ochre}" stroke="${ink}" stroke-width="1.6"/>
+  const phase=i*Math.PI/4, tail=Math.sin(phase-Math.PI/4)*3.4;
+  const bob=Math.sin(phase*2)*.6, headTilt=Math.sin(phase)*.45;
+  return `<g transform="translate(${(i%4)*256} ${Math.floor(i/4)*256})" stroke-linecap="round" stroke-linejoin="round" data-frame="${i}">
+  ${limbs.map(limb=>leg(limb,phase,bob)).join('')}
+  <g transform="translate(0 ${number(bob)})">
+    <path d="M83 181 C57 181 47 163 50 ${151+tail} C53 ${137+tail} 64 ${135+tail} 69 ${145+tail}" fill="none" stroke="${ink}" stroke-width="19"/>
+    <path d="M83 181 C57 181 47 163 50 ${151+tail} C53 ${137+tail} 64 ${135+tail} 69 ${145+tail}" fill="none" stroke="${cream}" stroke-width="14"/>
+    <path d="M83 173 C96 156 124 153 146 160 C161 157 180 165 188 180
+      C198 195 189 207 174 210 Q151 216 122 211
+      Q98 216 81 207 C69 199 70 183 83 173Z" fill="${cream}" stroke="${ink}" stroke-width="2.6"/>
+    <path d="M100 190 C108 178 131 178 146 187 Q165 197 159 208 Q134 215 110 207Z" fill="#eedfc5" opacity=".82"/>
+    <path d="M85 177 Q90 173 96 173 M80 188 Q79 193 81 196" fill="none" stroke="#b8a78b" stroke-width="1.3" opacity=".72"/>
+    <g transform="rotate(${number(headTilt)} 173 166)">
+      <path d="M139 116 Q139 107 143 94 Q146 86 152 94 L163 108
+        Q177 102 191 107 L207 94 Q214 90 214 100 L213 116
+        C226 127 232 144 225 159 C219 175 202 185 183 185
+        C160 186 140 176 134 160 Q127 142 139 116Z" fill="${cream}" stroke="${ink}" stroke-width="2.6"/>
+      <path d="M147 98 Q144 104 145 114 L155 110Z M209 100 L199 111 L210 116Z" fill="${rose}" opacity=".58"/>
+      <path d="M140 124 Q143 121 146 121 M214 121 L218 125" fill="none" stroke="#b8a78b" stroke-width="1.3"/>
+      <path d="M139 169 Q163 186 195 179 L194 189 Q163 198 138 181Z" fill="${ochre}" stroke="${ink}" stroke-width="2.1"/>
+      <path d="M159 189 Q157 204 149 212 Q155 217 163 214 L174 192Z" fill="${ochre}" stroke="${ink}" stroke-width="2.1"/>
+      <path d="M153 208 L162 211" fill="none" stroke="#a87c3b" stroke-width="1.4"/>
+      <ellipse cx="183" cy="141" rx="2.55" ry="3.4" fill="${ink}"/>
+      <ellipse cx="212" cy="140" rx="1.85" ry="3" fill="${ink}"/>
+      <path d="M177 132 Q182 130 186 132" fill="none" stroke="${ink}" stroke-width="1.6"/>
+      <ellipse cx="173" cy="153" rx="9" ry="4.5" fill="${rose}" opacity=".38"/>
+      <ellipse cx="218" cy="150" rx="4.8" ry="3.3" fill="${rose}" opacity=".23"/>
+      <path d="M211 153 Q216 151 219 154 L215 158Z" fill="${rose}"/>
+      <path d="M215 158 Q214 164 208 163 Q204 163 201 160" fill="none" stroke="${ink}" stroke-width="1.7"/>
+      <path d="M193 153 L182 150 M194 160 L183 163" fill="none" stroke="${ink}" stroke-width="1.45"/>
+    </g>
+    <path d="M122 187 L125 192 L131 193 L127 197 L127 203 L122 200 L117 203 L118 197 L114 193 L120 192Z" fill="${ochre}" stroke="${ink}" stroke-width="1.45"/>
+    <path d="M121 192 L123 195" stroke="${cream}" stroke-width="1.25"/>
   </g></g>`;
 }
 const sheet=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 512" width="1024" height="512">${Array.from({length:8},(_,i)=>walker(i)).join('')}</svg>`;
 (async()=>{
-  fs.writeFileSync(path.join(dir,'mooncat-art.svg'), hero, 'utf8');
+  const spritesOnly=process.argv.includes('--sprites-only');
+  if(!spritesOnly)fs.writeFileSync(path.join(dir,'mooncat-art.svg'), hero, 'utf8');
   fs.writeFileSync(path.join(dir,'cat-walk.svg'), sheet, 'utf8');
-  await sharp(Buffer.from(hero),{density:96}).resize(768,768).png().toFile(path.join(dir,'mooncat-art.png'));
+  if(!spritesOnly)await sharp(Buffer.from(hero),{density:96}).resize(768,768).png().toFile(path.join(dir,'mooncat-art.png'));
   await sharp(Buffer.from(sheet),{density:96}).resize(1024,512).png().toFile(path.join(dir,'cat-walk.png'));
   console.log(JSON.stringify({hero:await sharp(path.join(dir,'mooncat-art.png')).metadata(),walk:await sharp(path.join(dir,'cat-walk.png')).metadata()},null,2));
 })();

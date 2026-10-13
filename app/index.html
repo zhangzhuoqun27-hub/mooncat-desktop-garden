@@ -2,70 +2,39 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#171226">
-  <meta name="description" content="喵星夜航：与一只小猫一起，在星光里躲一会儿。一个可互动的温柔宇宙。">
-  <title>喵星夜航 · Mooncat</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🌙%3C/text%3E%3C/svg%3E">
-  <link rel="stylesheet" href="game.css"><link rel="stylesheet" href="scene.css"><script src="starfield.js" defer></script><script src="audio.js" defer></script><script src="game.js" defer></script><script src="app.js" defer></script>
+  <meta name="theme-color" content="#1b2e33"><title>Winesun · 喵星夜航</title>
+  <link rel="stylesheet" href="game.css"><link rel="stylesheet" href="scene.css">
+  <script src="starfield.js" defer></script><script src="audio.js" defer></script><script src="game.js" defer></script><script src="app.js" defer></script>
 </head>
 <body data-theme="violet">
 <svg class="sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
 <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 2 2.7 6.8L22 12l-7.3 2.7L12 22l-2.7-7.3L2 12l7.3-3.2Z"/></symbol>
-<symbol id="i-moon" viewBox="0 0 24 24"><path d="M20.7 14.3A9 9 0 0 1 9.7 3.2a9 9 0 1 0 11 11.1Z"/></symbol>
 <symbol id="i-sound" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4ZM17 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/></symbol>
 <symbol id="i-expand" viewBox="0 0 24 24"><path d="M9 4H4v5m11-5h5v5M4 15v5h5m11-5v5h-5"/></symbol>
 <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"/></symbol>
 <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M6 18 18 6"/></symbol>
-<symbol id="i-map" viewBox="0 0 24 24"><path d="m5 6 12-2 3 13-12 3L5 6Zm0 0 15 11M8 20 17 4"/><circle cx="5" cy="6" r="2"/><circle cx="17" cy="4" r="2"/><circle cx="20" cy="17" r="2"/><circle cx="8" cy="20" r="2"/></symbol>
 <symbol id="i-plane" viewBox="0 0 24 24"><path d="m3 10 18-7-7 18-3-8-8-3Zm8 3L21 3"/></symbol>
-<symbol id="i-heart" viewBox="0 0 24 24"><path d="M20 5c-2.5-2.5-6-1-8 1-2-2-5.5-3.5-8-1-5 5 8 15 8 15S25 10 20 5Z"/></symbol>
 <symbol id="i-cat" viewBox="0 0 24 24"><path d="m4 11-1-8 7 4h4l7-4-1 8c4 11-20 11-16 0Z"/><path d="M8 12v1m8-1v1m-5 3 1 1 1-1M1 14l5 1m12 0 5-1"/></symbol>
 </defs></svg>
 <div class="sky-wash" aria-hidden="true"></div><div class="noise" aria-hidden="true"></div><canvas id="sky" aria-hidden="true"></canvas>
-
-<div class="cinema-layer" aria-hidden="true"><div class="nebula-ribbon"></div><div class="nebula-core"></div><div class="far-planet"></div><div class="horizon"></div><div class="lens-glow"></div></div>
+<div class="cinema-layer" aria-hidden="true"><div class="nebula-ribbon"></div><div class="nebula-core"></div><div class="far-planet"></div><div class="horizon"></div></div>
 <div class="site-shell">
-<header class="header">
-  <a class="brand" href="#" aria-label="喵星夜航首页"><span class="brand-icon"><svg><use href="#i-cat"/></svg></span><span>mooncat<small>喵 星 夜 航</small></span></a>
-  <nav class="top-nav" aria-label="主导航"><button class="active" id="homeNav">漫游<span>01</span></button><button data-open="constellationDialog">星图<span id="navStar">02</span></button><button data-open="gameDialog">花园<span>03</span></button></nav>
-  <div class="header-tools"><span class="live-status"><i></i>月白在线</span><button id="soundSettings" class="icon-button" aria-label="打开声音设置" aria-expanded="false" aria-controls="soundPanel"><svg><use href="#i-sound"/></svg></button><button id="immersiveToggle" class="icon-button" aria-label="进入沉浸模式" aria-pressed="false" title="沉浸模式"><svg><use href="#i-expand"/></svg></button></div>
-  <div id="soundPanel" class="sound-panel" hidden><span class="section-kicker">THE SOUND OF SLOW</span><h3>调到舒服的音量。</h3><label for="volumeSlider">音乐与音效<span id="volumeValue">45%</span></label><input type="range" id="volumeSlider" min="0" max="100" value="45" aria-label="音乐与音效音量"><button id="effectsMute" class="secondary-button" aria-pressed="false">静音所有声音</button><p>钢琴 · 氛围弦乐 · 星光音符<br>摸摸月白，还会听见一声喵。</p></div>
-</header>
-<main>
-<section class="universe" aria-labelledby="heroTitle">
-  <div class="hero-copy">
-    <div class="eyebrow"><span class="live-dot"></span> SOMEWHERE, SOFT. <span class="eyebrow-line"></span></div>
-    <h1 id="heroTitle">把世界<span class="word-slow">调慢。</span><br>让<span class="title-star">星光<svg><use href="#i-star"/></svg></span>靠近。</h1>
-    <p class="intro">种几朵月光花，摸摸小猫。<br>在宇宙里，过点不赶时间的小日子。</p>
-    <div class="hero-actions"><button id="voyageButton" class="primary-button"><span>去月球种点花</span><svg class="arrow"><use href="#i-arrow"/></svg></button><button id="meteorButton" class="text-button" aria-label="召唤一场流星"><svg><use href="#i-star"/></svg><span>等一场流星</span></button></div>
-    <div class="voyage-note"><svg><use href="#i-sound"/></svg><span id="voyageNote">戴上耳机，让旋律陪你慢下来。</span></div>
-  </div>
-  <div class="hero-art" id="heroArt">
-    <div class="planet-halo"></div><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><span class="orbital-dot dot-one"></span><span class="orbital-dot dot-two"></span>
-    <div class="planet-label"><span class="crosshair">＋</span><span id="planetCoordinates">01 / MOONLIGHT SANCTUARY</span><span class="label-line"></span></div>
-    <button class="cat-button" id="catButton" aria-label="摸摸小猫月白，听一声猫叫"><img id="catArtwork" src="assets/mooncat-art.png" alt="柔软的奶白小猫，坐在发着微光的月球上" draggable="false"></button>
-    <div class="cat-bubble" id="catBubble"><span class="bubble-dot"></span><span id="catWords" aria-live="polite">你来啦。今晚的星光，分你一半。</span></div>
-    <button class="scene-beacon beacon-game" data-open="gameDialog" aria-label="进入月球小花园"><span class="beacon-orb">✦</span><span class="beacon-label"><b>月球小花园</b><small>GROW SOMETHING</small></span></button>
-    <button class="scene-beacon beacon-wish" data-open="wishDialog" aria-label="打开宇宙心愿信箱"><span class="beacon-orb">✧</span><span class="beacon-label"><b>宇宙信箱</b><small>MAKE A WISH</small></span></button>
-    <div class="cat-caption"><span class="cat-status"></span><span>月白 <small>YOUR COSMIC COMPANION</small></span><span class="caption-separator"></span><span class="pet-hint">摸摸我，喵 <svg><use href="#i-heart"/></svg></span></div>
-  </div>
-  <div id="wishSky" class="wish-sky" aria-label="你送给宇宙的心愿"></div>
-  <div class="destination-rail" role="group" aria-label="选择夜空"><span class="rail-label">CHOOSE YOUR SKY</span><button class="destination selected" data-theme="violet" aria-pressed="true"><span class="planet-swatch violet"></span><span>晚安月球<small>01</small></span></button><button class="destination" data-theme="blue" aria-pressed="false"><span class="planet-swatch blue"></span><span>蓝色梦境<small>02</small></span></button><button class="destination" data-theme="rose" aria-pressed="false"><span class="planet-swatch rose"></span><span>玫瑰星云<small>03</small></span></button></div>
-</section>
-<section class="activity-dock" aria-label="夜航活动">
-  <button class="activity featured" data-open="gameDialog"><span class="activity-icon"><svg><use href="#i-star"/></svg></span><span><strong>月球小花园</strong><small>种花、浇水，慢慢养一座花园</small></span><span class="activity-arrow">↗</span></button>
-  <button class="activity" data-open="constellationDialog"><span class="activity-icon"><svg><use href="#i-map"/></svg></span><span><strong>猫咪星座</strong><small id="constellationHint">点亮属于你的星图</small></span><span class="activity-arrow">↗</span></button>
-  <button class="activity" data-open="wishDialog"><span class="activity-icon"><svg><use href="#i-plane"/></svg></span><span><strong>心愿信箱</strong><small id="wishHint">让小小的愿望发光</small></span><span class="activity-arrow">↗</span></button>
-  <button class="activity" id="companyButton"><span class="activity-icon"><svg><use href="#i-cat"/></svg></span><span><strong>陪伴时刻</strong><small id="petHint">跟着月白，慢慢呼吸</small></span><span class="activity-arrow">↗</span></button>
-</section>
-</main>
-<footer><div class="music-player"><button id="soundToggle" class="record-button" aria-label="播放舒缓音乐" aria-pressed="false"><span class="record-disc"><i></i></span><span class="record-play">▶</span></button><div class="track-info"><span class="track-title">Moonlit Letters <span class="track-badge">ORIGINAL</span></span><span class="track-caption" id="musicStatus">轻触唱片，听见星空</span></div><div class="player-bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div></div><span class="footer-hint"><span class="footer-dot"></span>触碰宇宙，让一点美好发生。</span><span class="footer-time">AFTER HOURS <span id="localClock">22:00</span> <i>✦</i></span></footer>
+  <header class="header">
+    <a class="brand" href="#" aria-label="Winesun的观星站"><span class="brand-icon"><svg><use href="#i-cat"/></svg></span><span>mooncat<small>Winesun · 喵星夜航</small></span></a>
+    <div class="header-tools"><button id="soundSettings" class="icon-button" aria-label="声音设置" aria-expanded="false" aria-controls="soundPanel" title="声音设置"><svg><use href="#i-sound"/></svg></button><button id="fullscreenToggle" class="icon-button" aria-label="切换全屏" title="切换全屏"><svg><use href="#i-expand"/></svg></button><button id="homeHide" class="icon-button" aria-label="最小化到任务栏" title="最小化到任务栏">−</button></div>
+    <div id="soundPanel" class="sound-panel" hidden><label for="volumeSlider">调到舒服的音量<span id="volumeValue">45%</span></label><input type="range" id="volumeSlider" min="0" max="100" value="45" aria-label="音乐与音效音量"><button id="effectsMute" class="secondary-button" aria-pressed="false">静音所有声音</button><p id="trackDescription">月光钢琴 · 慢慢入夜</p></div>
+  </header>
+  <main>
+    <section class="universe" aria-labelledby="heroTitle">
+      <div class="hero-copy"><div class="eyebrow"><span class="live-dot"></span> A LITTLE PLACE TO BE.</div><h1 id="heroTitle">把世界<span class="word-slow">调慢。</span><br>让<span class="title-star">星光</span>靠近。</h1><p class="intro">不赶路，也不急着长大。<br>Winesun陪你，过一点自己的时间。</p><div class="hero-actions"><button id="voyageButton" class="primary-button"><span>出趟远门</span><svg><use href="#i-arrow"/></svg></button><button id="meteorButton" class="text-button"><svg><use href="#i-star"/></svg><span>等一场流星</span></button></div><p class="voyage-note" id="voyageNote">去月岛住一会，花园会在桌边陪你。</p></div>
+      <div class="hero-art" id="heroArt"><div class="planet-halo"></div><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><span class="orbital-dot dot-one"></span><span class="orbital-dot dot-two"></span><div class="planet-label"><span>＋</span><span id="planetCoordinates">01 / MOONLIGHT SANCTUARY</span></div><button id="catButton" class="cat-button" aria-label="摸摸Winesun，听一声猫叫"><img id="catArtwork" src="assets/mooncat-art.png" alt="戴着围巾的插画小猫Winesun，坐在暖色弯月上" draggable="false"></button><div id="catBubble" class="cat-bubble"><span class="bubble-dot"></span><span id="catWords" aria-live="polite">你来啦，今晚的星星分你一半。</span></div><button class="scene-beacon beacon-garden" data-open="gameDialog" aria-label="打开月球小花园"><span class="beacon-orb">✦</span><span><b>月球小花园</b><small>A LITTLE MOON GARDEN</small></span></button><button class="scene-beacon beacon-wish" data-open="wishDialog" aria-label="打开宇宙信箱"><span class="beacon-orb">✧</span><span><b>宇宙信箱</b><small>MAKE A WISH</small></span></button><div class="cat-caption"><i></i><span>Winesun</span><small>摸摸我，喵 ♡</small></div></div>
+      <div id="wishSky" class="wish-sky" aria-label="你送给宇宙的心愿"></div>
+      <div class="destination-rail" role="group" aria-label="选择夜空与配乐"><button class="destination selected" data-theme="violet" aria-pressed="true"><span class="planet-swatch violet"></span>晚安月球</button><button class="destination" data-theme="blue" aria-pressed="false"><span class="planet-swatch blue"></span>蓝色梦境</button><button class="destination" data-theme="rose" aria-pressed="false"><span class="planet-swatch rose"></span>玫瑰星云</button></div>
+    </section>
+  </main>
+  <footer><div class="music-player"><button id="soundToggle" class="record-button" aria-label="播放音乐" aria-pressed="false"><span class="record-disc"><i></i></span><span class="record-play">▶</span></button><div class="track-info"><span class="track-title" id="trackTitle">月光来信</span><span class="track-caption" id="musicStatus">旋律正在靠近</span></div><div class="player-bars" aria-hidden="true"><i></i><i></i><i></i><i></i></div></div><span class="footer-time" id="localClock"></span></footer>
 </div>
-
-<button id="exitImmersive" class="exit-immersive"><svg><use href="#i-expand"/></svg> 返回观星站 <kbd>Esc</kbd></button>
-<div class="toast" id="toast" role="status" aria-live="polite"></div>
-<div id="heartLayer" aria-hidden="true"></div>
-<dialog id="constellationDialog" class="modal constellation-modal" aria-labelledby="constellationTitle"><div class="modal-top"><span class="section-kicker">YOUR OWN CONSTELLATION</span><button class="icon-button close-dialog" aria-label="关闭星图"><svg><use href="#i-close"/></svg></button></div><h2 id="constellationTitle">把星光，连成一只猫。</h2><p id="constellationMessage" aria-live="polite">从 01 开始，依次触碰星星，唤醒藏在夜空里的朋友。</p><div id="constellationBoard" class="constellation-board"><svg viewBox="0 0 600 320" preserveAspectRatio="none" aria-hidden="true"><path class="guide-path" d="M165 235 140 75 240 135 360 135 460 75 435 235 370 270 230 270Z"/><path id="drawnPath" d=""/><g class="constellation-face"><path d="M238 198q10 13 20 0m84 0q10 13 20 0m-71 29 9 7 9-7m-9 7v9m0-3q-13 12-23 0m23 0q13 12 23 0"/></g></svg></div><div class="constellation-bottom"><span class="progress-label"><span id="starProgress">0</span> / 8 颗星已点亮</span><button id="resetConstellation" class="secondary-button">重新连线 ↻</button></div></dialog>
-<dialog id="wishDialog" class="modal wish-modal" aria-labelledby="wishTitle"><div class="modal-top"><span class="section-kicker">LET THE UNIVERSE KEEP IT</span><button class="icon-button close-dialog" aria-label="关闭心愿信箱"><svg><use href="#i-close"/></svg></button></div><div class="wish-orbit" aria-hidden="true">✧<span>✦</span>✧</div><h2 id="wishTitle">把心事，轻轻交给星空。</h2><p>写给未来的自己，也写给此刻的你。</p><form id="wishForm"><label class="visually-hidden" for="wishInput">你的心愿</label><textarea id="wishInput" maxlength="80" placeholder="希望以后的每一天，都有一点小小的开心……" required></textarea><div class="wish-form-bottom"><span><span id="wishChars">0</span> / 80</span><button class="primary-button" type="submit">让愿望成为星星 <svg><use href="#i-plane"/></svg></button></div></form><div class="wish-archive"><h3>你的星光收藏 <span id="wishCount">0</span></h3><div id="wishList"></div><small class="local-note">心愿只保存在当前浏览器里，随时可以删除。</small></div></dialog>
-<dialog id="companyDialog" class="modal company-modal" aria-labelledby="companyTitle"><div class="modal-top"><span class="section-kicker">JUST BE HERE</span><button class="icon-button close-dialog" aria-label="结束陪伴"><svg><use href="#i-close"/></svg></button></div><div class="breathing-circle"><svg><use href="#i-cat"/></svg></div><h2 id="companyTitle">现在，什么都不用做。</h2><p id="breathingText">跟着光圈，慢慢吸气。</p><p class="company-subtitle">肩膀放松一点，月白就在你身边。</p><button id="companySound" class="secondary-button">开启舒缓音乐</button><small>光圈以 10 秒为一个呼吸周期，按自己舒服的节奏就好。</small></dialog>
-<dialog id="gameDialog" class="modal game-modal" aria-labelledby="gameTitle"><div class="modal-top"><span class="section-kicker">YOUR LITTLE GARDEN ON THE MOON</span><div class="garden-top-tools"><button id="gardenMusic" class="garden-music-button" aria-pressed="false"><svg><use href="#i-sound"/></svg><span>播放音乐</span></button><button class="icon-button close-dialog" aria-label="关闭月球小花园"><svg><use href="#i-close"/></svg></button></div></div><h2 id="gameTitle">月球小花园</h2><div id="gameRoot"></div></dialog></body></html>
+<div id="toast" class="toast" role="status" aria-live="polite"></div><div id="heartLayer" aria-hidden="true"></div>
+<dialog id="wishDialog" class="modal wish-modal" aria-labelledby="wishTitle"><div class="modal-top"><span>LET THE UNIVERSE KEEP IT</span><button class="icon-button close-dialog" aria-label="关闭信箱"><svg><use href="#i-close"/></svg></button></div><div class="wish-orbit" aria-hidden="true">✧ <span>✦</span> ✧</div><h2 id="wishTitle">把心事，轻轻交给星空。</h2><p>写给未来的自己，也写给此刻的你。</p><form id="wishForm"><label class="visually-hidden" for="wishInput">你的心愿</label><textarea id="wishInput" maxlength="80" placeholder="希望以后的每一天，都有一点小小的开心……" required></textarea><div class="wish-form-bottom"><span><span id="wishChars">0</span> / 80</span><button class="primary-button" type="submit">寄给星空 <svg><use href="#i-plane"/></svg></button></div></form><div class="wish-archive"><h3>留在这里的星光 <span id="wishCount">0</span></h3><div id="wishList"></div><small class="local-note">心愿只保存在这台电脑，随时可以删除。</small></div></dialog>
+<dialog id="gameDialog" class="modal game-modal" aria-labelledby="gameTitle"><div class="modal-top"><span>YOUR LITTLE GARDEN ON THE MOON</span><div class="game-dialog-tools"><button id="modalMusic" class="text-button" aria-pressed="false"><svg><use href="#i-sound"/></svg><span>音乐</span></button><button class="icon-button close-dialog" aria-label="关闭花园"><svg><use href="#i-close"/></svg></button></div></div><h2 id="gameTitle" class="visually-hidden">Winesun 的小花园</h2><div id="gameRoot"></div><div id="modalBlessings" class="modal-blessings">Winesun 已为你送来 0 次祝福</div></dialog>
+</body></html>

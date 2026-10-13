@@ -14,14 +14,30 @@ jobs:
   build:
     runs-on: windows-2022
     timeout-minutes: 15
+    outputs:
+      version: ${{ steps.version.outputs.version }}
     defaults:
       run:
-        shell: powershell
+        shell: pwsh
     steps:
       - name: Check out source
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           persist-credentials: false
+      - name: Read and validate release version
+        id: version
+        env:
+          MOONCAT_REF_TYPE: ${{ github.ref_type }}
+          MOONCAT_REF_NAME: ${{ github.ref_name }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $taskVersion = (Get-Content -LiteralPath .\package.json -Raw | ConvertFrom-Json).version
+          if ($taskVersion -notmatch '^\d+\.\d+\.\d+$') { throw 'package.json must contain a stable semantic release version.' }
+          if ($env:MOONCAT_REF_TYPE -eq 'tag' -and $env:MOONCAT_REF_NAME -ne ('v' + $taskVersion)) {
+            throw 'Pushed tag does not match the package.json version.'
+          }
+          if (!(Test-Path -LiteralPath ('RELEASE_NOTES-v' + $taskVersion + '.md'))) { throw 'Versioned release notes are missing.' }
+          Add-Content -LiteralPath $env:GITHUB_OUTPUT -Value ('version=' + $taskVersion) -Encoding utf8
       - name: Check JavaScript syntax
         run: |
           $ErrorActionPreference = 'Stop'
@@ -31,19 +47,89 @@ jobs:
           }
           & node --check .\scripts\draw-mooncat.cjs
           if ($LASTEXITCODE -ne 0) { throw 'Artwork script syntax check failed.' }
+      - name: Verify garden economy
+        run: |
+          $ErrorActionPreference = 'Stop'
+          & node .\tests\economy.test.cjs
+          if ($LASTEXITCODE -ne 0) { throw 'Garden economy regression checks failed.' }
       - name: Obtain verified SDK and build
         run: |
           & .\desktop\install-sdk.ps1
           & .\desktop\build.ps1 -OutputPath .\dist\Mooncat.exe
-          Copy-Item -LiteralPath .\LICENSE -Destination .\dist\LICENSE
-          Copy-Item -LiteralPath .\THIRD_PARTY_NOTICES.md -Destination .\dist\THIRD_PARTY_NOTICES.md
-          $taskHash = (Get-FileHash -LiteralPath .\dist\Mooncat.exe -Algorithm SHA256).Hash.ToLowerInvariant()
-          [IO.File]::WriteAllText((Join-Path $PWD 'dist\SHA256SUMS.txt'),($taskHash + '  Mooncat.exe' + [Environment]::NewLine),[Text.Encoding]::ASCII)
+      - name: Prepare complete Windows package
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          $taskVersion = (Get-Content -LiteralPath .\package.json -Raw | ConvertFrom-Json).version
+          $taskDist = [IO.Path]::GetFullPath((Join-Path $PWD 'dist'))
+          $taskExe = Join-Path $taskDist 'Mooncat.exe'
+          if ((Get-Item -LiteralPath $taskExe).VersionInfo.FileVersion -ne ($taskVersion + '.0')) { throw 'EXE file version differs from package.json.' }
+          $taskStage = Join-Path $env:RUNNER_TEMP ('mooncat-package-' + [Guid]::NewGuid().ToString('N'))
+          New-Item -ItemType Directory -Path $taskStage | Out-Null
+          Copy-Item -LiteralPath $taskExe -Destination (Join-Path $taskStage 'Mooncat.exe')
+          Copy-Item -LiteralPath .\LICENSE -Destination (Join-Path $taskStage 'LICENSE')
+          Copy-Item -LiteralPath .\THIRD_PARTY_NOTICES.md -Destination (Join-Path $taskStage 'THIRD_PARTY_NOTICES.md')
+          Copy-Item -LiteralPath .\desktop\sdk\LICENSE.txt -Destination (Join-Path $taskStage 'Microsoft-WebView2-LICENSE.txt')
+          Copy-Item -LiteralPath .\desktop\sdk\NOTICE.txt -Destination (Join-Path $taskStage 'Microsoft-WebView2-NOTICE.txt')
+          $taskGuide = @'
+          Mooncat v{{VERSION}} · Winesun 的小花园
+
+          Windows 10 / 11 x64：解压完整压缩包后，双击 Mooncat.exe。
+          页面、插画、音效和宿主组件已嵌入 EXE，不需要打开 HTML、浏览器或服务器。
+          运行需要 .NET Framework 4.8 和 Microsoft WebView2 Evergreen Runtime。
+          如果提示缺少 WebView2，请从 Microsoft 官方页面安装 Evergreen Runtime：
+          https://developer.microsoft.com/microsoft-edge/webview2/
+
+          启动进入全屏星空，音乐轻轻淡入。点“月球小花园”可在主页经营花田。
+          点“出趟远门”打开桌边花园与任务栏小猫；点“返航”回到星空。
+          花园右侧保留返航、置顶、音乐和最小化四个工具。
+          双击任务栏小猫或点击任务栏应用按钮，可以找回花园。
+          可以拖起小猫，松手后会落回任务栏。右键小猫可暂停散步或退出。
+          X 和最小化按钮会保留任务栏入口；完整退出请用小猫或系统托盘的退出菜单。
+          Esc 先关闭主页弹窗，再退出全屏。声音按钮可随时暂停音乐。
+
+          六块花田可以手动种花、浇水，也可以交给 Winesun 自动照料。
+          花园、心愿与声音偏好自动保存在本机，不需要账户或联网。
+          更新时先完整退出旧版，再运行新版 EXE；正常更新会继续使用原有存档。
+          不要删除 %LOCALAPPDATA%\Mooncat\MoonGarden，以免丢失存档。
+          程序不会注册开机启动。EXE 尚未进行代码签名。
+
+          LICENSE 和 THIRD_PARTY_NOTICES.md 说明原创内容与第三方素材的许可。
+          Microsoft-WebView2-LICENSE.txt 与 Microsoft-WebView2-NOTICE.txt 保留 Microsoft 条款。
+          SHA256SUMS.txt 可以用于核验压缩包内的文件。
+          '@
+          [IO.File]::WriteAllText((Join-Path $taskStage '使用说明.txt'),$taskGuide.Replace('{{VERSION}}',$taskVersion),[Text.UTF8Encoding]::new($false))
+          $taskInnerSums = @(Get-ChildItem -LiteralPath $taskStage -File | Sort-Object Name | ForEach-Object {
+            (Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant() + '  ' + $_.Name
+          })
+          [IO.File]::WriteAllText((Join-Path $taskStage 'SHA256SUMS.txt'),(($taskInnerSums -join "`n") + "`n"),[Text.UTF8Encoding]::new($false))
+          $taskZipName = 'Mooncat-v' + $taskVersion + '-Windows-x64.zip'
+          $taskZip = Join-Path $taskDist $taskZipName
+          [IO.Compression.ZipFile]::CreateFromDirectory($taskStage,$taskZip,[IO.Compression.CompressionLevel]::Optimal,$false)
+          $taskExpectedFiles = @('Mooncat.exe','使用说明.txt','LICENSE','THIRD_PARTY_NOTICES.md','Microsoft-WebView2-LICENSE.txt','Microsoft-WebView2-NOTICE.txt','SHA256SUMS.txt')
+          $taskArchive = [IO.Compression.ZipFile]::OpenRead($taskZip)
+          try {
+            if ($taskArchive.Entries.Count -ne $taskExpectedFiles.Count) { throw 'Complete software ZIP has an unexpected file count.' }
+            foreach ($taskEntry in $taskArchive.Entries) {
+              if ($taskEntry.FullName -notin $taskExpectedFiles) { throw ('Unexpected ZIP entry: ' + $taskEntry.FullName) }
+            }
+          } finally { $taskArchive.Dispose() }
+          $taskPublicSums = @($taskExe,$taskZip) | ForEach-Object {
+            (Get-FileHash -LiteralPath $_ -Algorithm SHA256).Hash.ToLowerInvariant() + '  ' + [IO.Path]::GetFileName($_)
+          }
+          [IO.File]::WriteAllText((Join-Path $taskDist 'SHA256SUMS.txt'),(($taskPublicSums -join "`n") + "`n"),[Text.Encoding]::ASCII)
+          [IO.File]::WriteAllText((Join-Path $taskDist 'VERSION.txt'),($taskVersion + "`n"),[Text.Encoding]::ASCII)
+          Copy-Item -LiteralPath ('RELEASE_NOTES-v' + $taskVersion + '.md') -Destination (Join-Path $taskDist 'RELEASE_NOTES.md')
       - name: Upload Windows build
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: Mooncat-windows-x64
-          path: dist/
+          path: |
+            dist/Mooncat.exe
+            dist/Mooncat-v*-Windows-x64.zip
+            dist/SHA256SUMS.txt
+            dist/VERSION.txt
+            dist/RELEASE_NOTES.md
           if-no-files-found: error
           retention-days: 30
 
@@ -52,6 +138,9 @@ jobs:
     needs: build
     runs-on: windows-2022
     timeout-minutes: 10
+    concurrency:
+      group: mooncat-release-${{ needs.build.outputs.version }}
+      cancel-in-progress: false
     permissions:
       actions: read
       contents: write
@@ -64,27 +153,42 @@ jobs:
           MOONCAT_REF_NAME: ${{ github.ref_name }}
           MOONCAT_REPOSITORY: ${{ github.repository }}
           MOONCAT_COMMIT: ${{ github.sha }}
+          MOONCAT_VERSION: ${{ needs.build.outputs.version }}
         run: |
+          $ErrorActionPreference = 'Stop'
+          $taskVersion = $env:MOONCAT_VERSION
+          if ($taskVersion -notmatch '^\d+\.\d+\.\d+$') { throw 'Build did not provide a valid release version.' }
           $taskIsTag = $env:MOONCAT_REF_TYPE -eq 'tag'
-          $taskTag = if ($taskIsTag) { $env:MOONCAT_REF_NAME } else { 'v0.1.0' }
-          gh release view $taskTag --repo $env:MOONCAT_REPOSITORY 2>$null
+          $taskTag = 'v' + $taskVersion
+          if ($taskIsTag -and $env:MOONCAT_REF_NAME -ne $taskTag) { throw 'Tag and built version do not match.' }
+          gh release view $taskTag --repo $env:MOONCAT_REPOSITORY --json tagName 2>$null
           if ($LASTEXITCODE -eq 0) {
             Write-Output ('Release already exists; retaining its published assets: ' + $taskTag)
             exit 0
           }
-          if (!$taskIsTag) {
-            gh api ('repos/' + $env:MOONCAT_REPOSITORY + '/git/ref/tags/' + $taskTag) 2>$null
-            if ($LASTEXITCODE -eq 0) {
-              Write-Output ('Tag already exists; initial release must be published explicitly: ' + $taskTag)
-              exit 0
-            }
-          }
           gh run download $env:GITHUB_RUN_ID --repo $env:MOONCAT_REPOSITORY --name Mooncat-windows-x64 --dir release-files
           if ($LASTEXITCODE -ne 0) { throw 'Build artifact download failed.' }
-          $taskAssets = Get-ChildItem -LiteralPath release-files -File | Select-Object -ExpandProperty FullName
+          $taskFiles = [IO.Path]::GetFullPath((Join-Path $PWD 'release-files'))
+          if ((Get-Content -LiteralPath (Join-Path $taskFiles 'VERSION.txt') -Raw).Trim() -ne $taskVersion) { throw 'Downloaded artifact has a different version.' }
+          $taskZipName = 'Mooncat-' + $taskTag + '-Windows-x64.zip'
+          $taskAssetNames = @('Mooncat.exe',$taskZipName,'SHA256SUMS.txt')
+          $taskAssets = @($taskAssetNames | ForEach-Object { Join-Path $taskFiles $_ })
+          foreach ($taskAsset in $taskAssets) { if (!(Test-Path -LiteralPath $taskAsset -PathType Leaf)) { throw ('Release asset missing: ' + $taskAsset) } }
+          $taskNotes = Join-Path $taskFiles 'RELEASE_NOTES.md'
+          if (!(Test-Path -LiteralPath $taskNotes)) { throw 'Build release notes missing.' }
+          $taskSums = @(Get-Content -LiteralPath (Join-Path $taskFiles 'SHA256SUMS.txt'))
+          if ($taskSums.Count -ne 2) { throw 'Unexpected public checksum entries.' }
+          foreach ($taskName in @('Mooncat.exe',$taskZipName)) {
+            $taskExpected = (Get-FileHash -LiteralPath (Join-Path $taskFiles $taskName) -Algorithm SHA256).Hash.ToLowerInvariant() + '  ' + $taskName
+            if ($taskExpected -notin $taskSums) { throw ('Release asset checksum mismatch: ' + $taskName) }
+          }
+          if (!$taskIsTag) {
+            $taskExistingTagCommit = gh api ('repos/' + $env:MOONCAT_REPOSITORY + '/commits/' + $taskTag) --jq .sha 2>$null
+            if ($LASTEXITCODE -eq 0 -and $taskExistingTagCommit.Trim() -ne $env:MOONCAT_COMMIT) { throw 'An unpublished version tag points to another commit; refusing to replace it.' }
+          }
           if ($taskIsTag) {
-            gh release create $taskTag @taskAssets --repo $env:MOONCAT_REPOSITORY --verify-tag --generate-notes --title ('Mooncat ' + $taskTag)
+            gh release create $taskTag @taskAssets --repo $env:MOONCAT_REPOSITORY --verify-tag --notes-file $taskNotes --title ('Mooncat · Winesun ' + $taskTag)
           } else {
-            gh release create $taskTag @taskAssets --repo $env:MOONCAT_REPOSITORY --target $env:MOONCAT_COMMIT --generate-notes --title ('Mooncat ' + $taskTag)
+            gh release create $taskTag @taskAssets --repo $env:MOONCAT_REPOSITORY --target $env:MOONCAT_COMMIT --notes-file $taskNotes --title ('Mooncat · Winesun ' + $taskTag)
           }
           if ($LASTEXITCODE -ne 0) { throw 'Release publication failed.' }

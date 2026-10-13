@@ -1,22 +1,53 @@
 /* A little persistent moon garden. Everything illustrated here is original canvas art. */
 (() => {
   'use strict';
-  const W = 700, H = 440, STORAGE_KEY = 'mooncat.moon-garden.v1';
+  // Keep the storage key stable so the installed v0.1 garden migrates in place.
+  const W = 700, H = 440, STORAGE_KEY = 'mooncat.moon-garden.v1', SCHEMA = 2;
+  const MINUTE = 60000, OFFLINE_LIMIT = 24 * 60 * MINUTE;
+  const WEATHER = { moon: '月夜', breeze: '轻风', rain: '细雨', sun: '晴光' };
+  const WEATHER_ORDER = ['moon', 'breeze', 'rain', 'sun'];
+  const weatherAt = time => WEATHER_ORDER[Math.floor(time / (30 * MINUTE)) % 4];
+  const timeText = ms => ms >= 60 * MINUTE ? `${Math.ceil(ms / MINUTE)} 分钟` : `${Math.max(1, Math.ceil(ms / MINUTE))} 分钟`;
   const SEEDS = {
-    moon: { name: '月白花', cost: 2, time: 15000, yield: 4, petal: '#f2e4c5', center: '#b8974c', leaf: '#6e8b68' },
-    dream: { name: '晚梦铃', cost: 3, time: 30000, yield: 6, petal: '#c9a5a2', center: '#ddc794', leaf: '#6f8b78' },
-    peach: { name: '桃星花', cost: 4, time: 45000, yield: 8, petal: '#d6b977', center: '#efe0b7', leaf: '#819064' }
+    moon: { name: '月光花', cost: 2, time: 8 * MINUTE, yield: 3, petals: 1, likes: 'moon', shape: 'daisy', height: 1, petal: '#f2e4c5', center: '#b8974c', leaf: '#6e8b68', detail: '一次浇水就够；月夜里早开一会儿。' },
+    dream: { name: '晚梦铃', cost: 3, time: 15 * MINUTE, yield: 4, petals: 1, likes: 'rain', rainWater: true, mood: 4, shape: 'bell', height: .92, petal: '#c9a5a2', center: '#ddc794', leaf: '#6f8b78', detail: '细雨会帮它浇水；收获时Winesun心情 +4。' },
+    peach: { name: '桃星花', cost: 4, time: 25 * MINUTE, yield: 5, petals: 1, likes: 'breeze', windPetal: true, shape: 'star', height: 1, petal: '#d6b977', center: '#efe0b7', leaf: '#819064', detail: '喜欢轻风；迎风种下，多留一片花瓣。' },
+    dew: { name: '雨露盏', cost: 4, time: 45 * MINUTE, yield: 6, petals: 2, likes: 'rain', rainWater: true, extraWater: true, shape: 'cup', height: 1.08, petal: '#a7c2bd', center: '#e6d6ab', leaf: '#6f8f79', detail: '叶尖藏露珠；补浇一次水，提早 5% 开花。' },
+    sun: { name: '小暖阳', cost: 5, time: 70 * MINUTE, yield: 7, petals: 2, likes: 'sun', shape: 'sun', height: 1.24, petal: '#d9b466', center: '#8b7450', leaf: '#789366', detail: '花盘向光轻轻转；晴光里早开一会儿。' },
+    lull: { name: '月眠兰', cost: 6, time: 100 * MINUTE, yield: 9, petals: 3, likes: 'moon', extraWater: true, shape: 'orchid', height: 1.15, petal: '#ded8b9', center: '#bfa286', leaf: '#688e80', detail: '陪你度过长夜；可补水，开花有小夜蝶。' }
   };
-  const DECOR = { bench: { name: '月光长椅', price: 8 }, lantern: { name: '暖星灯', price: 10 }, mushroom: { name: '小蘑菇屋', price: 12 } };
+  const DECOR = {
+    bench: { name: '月光长椅', price: 18, petals: 4, varieties: 0, detail: '池塘边多一张木长椅。' },
+    lantern: { name: '暖星灯', price: 28, petals: 8, varieties: 0, detail: '栏杆旁有一盏微微摇曳的灯。' },
+    mushroom: { name: '小蘑菇屋', price: 40, petals: 12, varieties: 1, detail: '一座有小圆窗的蘑菇屋。' },
+    windchime: { name: '叶子风铃', price: 36, petals: 10, varieties: 2, detail: '见过 2 种花；风里晃动的小铃。' },
+    birdbath: { name: '小鸟饮水台', price: 48, petals: 14, varieties: 3, detail: '见过 3 种花；一只小鸟来喝水。' },
+    mailbox: { name: '花园信箱', price: 64, petals: 18, varieties: 4, detail: '见过 4 种花；门口有一封小信。' },
+    trellis: { name: '藤叶小拱门', price: 90, petals: 24, varieties: 5, detail: '见过 5 种花；月岛后面长出藤叶。' }
+  };
   const PLOTS = [{ x: 253, y: 222 }, { x: 357, y: 222 }, { x: 461, y: 222 }, { x: 253, y: 294 }, { x: 357, y: 294 }, { x: 461, y: 294 }];
   const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
   const finite = n => Number.isFinite(Number(n)) ? Number(n) : 0;
-  const flowerIcon = seed => `<svg viewBox="0 0 40 44" fill="none" aria-hidden="true"><path d="M20 37V18M20 29C12 30 10 25 11 23c6-1 9 3 9 6Zm0-4c6 0 10-4 9-7-6 0-9 4-9 7Z" stroke="${seed.leaf}" stroke-width="2" fill="${seed.leaf}"/><g fill="${seed.petal}"><ellipse cx="20" cy="10" rx="5" ry="8"/><ellipse cx="20" cy="10" rx="5" ry="8" transform="rotate(72 20 17)"/><ellipse cx="20" cy="10" rx="5" ry="8" transform="rotate(144 20 17)"/><ellipse cx="20" cy="10" rx="5" ry="8" transform="rotate(216 20 17)"/><ellipse cx="20" cy="10" rx="5" ry="8" transform="rotate(288 20 17)"/></g><circle cx="20" cy="17" r="4" fill="${seed.center}"/></svg>`;
+  const flowerIcon = seed => {
+    const shapes = {
+      bell: '<path d="M14 14c-2-13 14-13 12 0l6 9q-12 8-24 0l6-9Z"/>',
+      star: '<path d="m20 3 4 10 11 1-8 8 2 11-9-6-9 6 2-11-8-8 11-1 4-10Z"/>',
+      cup: '<path d="M7 12q7 2 8 9L20 5l5 16q1-7 8-9 1 21-13 22Q6 33 7 12Z"/>',
+      sun: Array.from({ length: 10 }, (_, i) => `<ellipse cx="20" cy="8" rx="3" ry="8" transform="rotate(${i * 36} 20 18)"/>`).join(''),
+      orchid: '<path d="M20 19Q1 4 6 1q13-1 14 15Q24-1 35 4q1 14-13 16 13 6 8 15-11-1-10-13-10 14-15 6 0-12 15-9Z"/>',
+      daisy: Array.from({ length: 5 }, (_, i) => `<ellipse cx="20" cy="10" rx="5" ry="8" transform="rotate(${i * 72} 20 17)"/>`).join('')
+    };
+    return `<svg viewBox="0 0 40 44" fill="none" aria-hidden="true"><path d="M20 40V19M20 31c-8 1-10-4-9-6 6-1 9 3 9 6Zm0-4c6 0 10-4 9-7-6 0-9 4-9 7Z" stroke="${seed.leaf}" stroke-width="2" fill="${seed.leaf}"/><g fill="${seed.petal}">${shapes[seed.shape]}</g><circle cx="20" cy="18" r="${seed.shape === 'sun' ? 7 : 3}" fill="${seed.center}"/></svg>`;
+  };
   const starIcon = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m12 2 2.8 6.8 7.2.8-5.4 4.8 1.6 7-6.2-3.6-6.2 3.6 1.6-7L2 9.6l7.2-.8L12 2Z" fill="#edcfa2"/></svg>`;
   const shopIcons = {
     bench: '<svg viewBox="0 0 28 28" fill="none" aria-hidden="true"><path d="M5 9h18v8H5z" fill="#a18b68"/><path d="M4 19h20M7 20v4m14-4v4M5 13h18" stroke="#dbcba5" stroke-width="2" stroke-linecap="round"/></svg>',
     lantern: '<svg viewBox="0 0 28 28" fill="none" aria-hidden="true"><path d="M14 3v4m-5 1h10l2 14H7L9 8Z" stroke="#887854" stroke-width="1.5"/><path d="M10 11h8l1 9H9l1-9Z" fill="#dac38d"/><path d="M6 24h16" stroke="#887854" stroke-width="1.5"/></svg>',
     mushroom: '<svg viewBox="0 0 28 28" fill="none" aria-hidden="true"><path d="M9 16h10v9H9z" fill="#e0d1ad"/><path d="M3 17c0-17 22-17 22 0H3Z" fill="#a88379"/><circle cx="10" cy="11" r="2" fill="#e8d9ba"/><circle cx="19" cy="13" r="2" fill="#e8d9ba"/></svg>',
+    windchime: '<svg viewBox="0 0 28 28" aria-hidden="true"><path d="M6 5h16M10 5v10m8-10v15" stroke="#887854" stroke-width="1.5" fill="none"/><path d="m7 14 3-3 3 3v7H7zm8 5 3-3 3 3v6h-6Z" fill="#9aab83"/></svg>',
+    birdbath: '<svg viewBox="0 0 28 28" aria-hidden="true"><path d="M14 13v10M9 24h10" stroke="#89775c" stroke-width="2"/><path d="M3 9h22q-2 8-11 8T3 9Z" fill="#a6b9aa"/><ellipse cx="20" cy="6" rx="4" ry="3" fill="#cfb781"/></svg>',
+    mailbox: '<svg viewBox="0 0 28 28" aria-hidden="true"><path d="M14 15v11" stroke="#89775c" stroke-width="3"/><path d="M4 15V7q0-5 6-5h8q6 0 6 5v8H4Z" fill="#b48475"/><path d="M7 8h9M19 4v6h5" stroke="#eadbb8" stroke-width="1.5"/></svg>',
+    trellis: '<svg viewBox="0 0 28 28" aria-hidden="true"><path d="M5 26V11q0-9 9-9t9 9v15M5 15h18M9 5v21m10-21v21" stroke="#a69268" stroke-width="1.5" fill="none"/><path d="M4 12q-5-7 2-5 6 1 5 4-3 3-7 1Zm17 7q7-8 7-2-1 7-7 6Z" fill="#8fa27b"/></svg>',
     feed: '<svg viewBox="0 0 28 28" fill="none" aria-hidden="true"><path d="M6 10 5 3l8 5h3l7-5-1 8c7 11-18 15-16-1Z" fill="#efe0c3"/><circle cx="10" cy="14" r="1" fill="#443c32"/><circle cx="18" cy="14" r="1" fill="#443c32"/><path d="m13 18 1 1 1-1" stroke="#a47d71" stroke-width="1.5"/></svg>'
   };
 
@@ -39,6 +70,8 @@
       this.lastDraw = null;
       this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       this.data = this.load();
+      this.selectedSeed = this.data.selectedSeed;
+      if (this.migrated) this.save();
       this.mount();
       this.bind();
       this.refresh();
@@ -50,45 +83,116 @@
 
     load() {
       const now = Date.now();
-      const data = { version: 1, wallet: 12, happiness: 65, plots: Array(6).fill(null), decorations: { bench: false, lantern: false, mushroom: false }, giftAt: 0, feedAt: 0, autoCare: this.defaultAutocare, autoAt: now };
+      const data = { version: SCHEMA, wallet: 12, happiness: 65, plots: Array(6).fill(null), decorations: Object.fromEntries(Object.keys(DECOR).map(k => [k, false])), giftAt: 0, feedAt: 0, autoCare: this.defaultAutocare, autoAt: now, selectedSeed: 'moon', petals: 0, harvested: 0, varieties: Object.fromEntries(Object.keys(SEEDS).map(k => [k, 0])), blessings: { count: 0, progress: 0, starsGiven: 0 }, ledger: { revision: 0, through: now, harvests: 0, grossStarlight: 0, blessingNet: 0 } };
       try {
         const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY));
-        if (!parsed || parsed.version !== 1 || typeof parsed !== 'object') return data;
+        if (!parsed || typeof parsed !== 'object' || (parsed.version !== 1 && parsed.version !== SCHEMA)) return data;
+        const legacy = parsed.version === 1;
+        this.migrated = legacy;
         data.wallet = Math.floor(clamp(finite(parsed.wallet), 0, 1000000));
         data.happiness = Math.round(clamp(finite(parsed.happiness), 0, 100));
         data.giftAt = clamp(finite(parsed.giftAt), 0, now);
         data.feedAt = clamp(finite(parsed.feedAt), 0, now);
         data.autoCare = typeof parsed.autoCare === 'boolean' ? parsed.autoCare : this.defaultAutocare;
-        data.autoAt = parsed.autoAt ? clamp(finite(parsed.autoAt), 1, now) : now;
+        data.autoAt = legacy ? now : clamp(Math.max(finite(parsed.autoAt), finite(parsed.ledger?.through)) || now, 1, now);
+        data.selectedSeed = Object.hasOwn(SEEDS, parsed.selectedSeed) ? parsed.selectedSeed : 'moon';
+        data.petals = Math.floor(clamp(finite(parsed.petals), 0, 1000000));
+        if (!legacy) data.blessings = { count: Math.floor(clamp(finite(parsed.blessings?.count), 0, 1000000)), progress: Math.floor(clamp(finite(parsed.blessings?.progress), 0, 99)), starsGiven: Math.floor(clamp(finite(parsed.blessings?.starsGiven), 0, 1000000000)) };
+        for (const key of Object.keys(SEEDS)) data.varieties[key] = Math.floor(clamp(finite(parsed.varieties?.[key]), 0, 1000000));
+        data.harvested = Math.max(Math.floor(clamp(finite(parsed.harvested), 0, 1000000)), Object.values(data.varieties).reduce((sum, n) => sum + n, 0));
+        data.ledger = { revision: Math.floor(clamp(finite(parsed.ledger?.revision), 0, 1000000000)), through: data.autoAt, harvests: data.harvested, grossStarlight: Math.floor(clamp(finite(parsed.ledger?.grossStarlight), 0, 1000000000)), blessingNet: legacy ? 0 : Math.floor(clamp(finite(parsed.ledger?.blessingNet) || data.blessings.count * 100 + data.blessings.progress, 0, 1000000000)) };
+        if (!legacy && finite(parsed.ledger?.lastHarvestAt) > 0) data.ledger.lastHarvestAt = clamp(finite(parsed.ledger.lastHarvestAt), 1, now);
         for (const key of Object.keys(DECOR)) data.decorations[key] = parsed.decorations && parsed.decorations[key] === true;
         if (Array.isArray(parsed.plots)) data.plots = Array.from({ length: 6 }, (_, i) => {
           const p = parsed.plots[i];
           if (!p || !Object.hasOwn(SEEDS, p.type)) return null;
-          return { type: p.type, plantedAt: clamp(finite(p.plantedAt), 1, now), wateredAt: p.wateredAt ? clamp(finite(p.wateredAt), 1, now) : 0 };
+          const seed = SEEDS[p.type];
+          let plantedAt = clamp(finite(p.plantedAt), 1, now), wateredAt = p.wateredAt ? clamp(finite(p.wateredAt), 1, now) : 0;
+          let readyAt = wateredAt ? wateredAt + seed.time : 0;
+          if (legacy && wateredAt) {
+            const oldDuration = { moon: 15000, dream: 30000, peach: 45000 }[p.type] || seed.time;
+            const progress = clamp((now - wateredAt) / oldDuration, 0, 1);
+            wateredAt = now - Math.round(seed.time * progress);
+            readyAt = wateredAt + seed.time;
+            plantedAt = Math.min(plantedAt, wateredAt);
+          } else if (wateredAt) readyAt = clamp(finite(p.readyAt) || readyAt, wateredAt, wateredAt + seed.time);
+          return { type: p.type, plantedAt, wateredAt, readyAt, weather: Object.hasOwn(WEATHER, p.weather) ? p.weather : weatherAt(wateredAt || plantedAt), extraWaterAt: !legacy && p.extraWaterAt ? clamp(finite(p.extraWaterAt), wateredAt || plantedAt, now) : 0, blessingEligible: !legacy && p.blessingEligible !== false };
         });
       } catch (_) { /* A new garden is always available, even without browser storage. */ }
       return data;
     }
 
     save() {
+      this.data.ledger.revision += 1;
+      this.data.ledger.through = this.data.autoAt;
       try { localStorage.setItem(STORAGE_KEY, JSON.stringify(this.data)); } catch (_) {}
     }
+
+    syncFromStorage() {
+      try {
+        const stored = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        if (stored?.version === SCHEMA && finite(stored.ledger?.revision) > this.data.ledger.revision) {
+          this.data = this.load(); this.selectedSeed = this.data.selectedSeed;
+        }
+      } catch (_) {}
+    }
+
+    duration(type, at) { return Math.round(SEEDS[type].time * (weatherAt(at) === SEEDS[type].likes ? .9 : 1)); }
+    newPlot(type, at, watered = false) { return { type, plantedAt: at, wateredAt: watered ? at : 0, readyAt: watered ? at + this.duration(type, at) : 0, weather: weatherAt(at), extraWaterAt: 0, blessingEligible: true }; }
+    water(plot, at) { plot.wateredAt = at; plot.readyAt = at + this.duration(plot.type, at); plot.weather = weatherAt(at); }
+    plotProgress(plot, now = Date.now()) { return !plot?.wateredAt ? .07 : clamp((now - plot.wateredAt) / Math.max(1, plot.readyAt - plot.wateredAt), .1, 1); }
+    varietyCount() { return Object.values(this.data.varieties).filter(n => n > 0).length; }
+    harvestReward(plot) { const seed = SEEDS[plot.type]; return { stars: seed.yield, petals: seed.petals + (seed.windPetal && plot.weather === 'breeze' ? 1 : 0), mood: seed.mood || 2 }; }
+    recordHarvest(plot, at) {
+      const reward = this.harvestReward(plot);
+      this.data.petals = Math.min(1000000, this.data.petals + reward.petals);
+      this.data.harvested += 1; this.data.varieties[plot.type] += 1;
+      this.data.happiness = Math.min(100, this.data.happiness + reward.mood);
+      this.data.ledger.harvests = this.data.harvested;
+      this.data.ledger.grossStarlight += reward.stars;
+      this.data.ledger.lastHarvestAt = at;
+      return reward;
+    }
+
+    creditBlessings(plot, reward) {
+      const result = { type: 'blessing', count: 0, totalCount: this.data.blessings.count, starlight: 0 };
+      // Migrated v1 flowers pay their ordinary harvest once; neither that
+      // migration credit, old balances nor cat gifts advance new blessings.
+      if (plot.blessingEligible === false) return result;
+      const profit = Math.max(0, reward.stars - SEEDS[plot.type].cost);
+      const blessings = this.data.blessings;
+      const total = blessings.progress + profit;
+      const milestones = Math.floor(total / 100);
+      blessings.progress = total % 100;
+      this.data.ledger.blessingNet += profit;
+      // At current seed yields each harvest crosses at most one milestone.
+      for (let i = 0; i < milestones; i++) {
+        const given = Math.floor(this.data.wallet / 5);
+        this.data.wallet -= given;
+        blessings.count += 1; blessings.starsGiven += given;
+        result.count += 1; result.starlight += given;
+      }
+      result.totalCount = blessings.count;
+      return result;
+    }
+
+    emitComplete(event) { if (this.onComplete) { try { this.onComplete(event); } catch (_) {} } }
 
     mount() {
       this.el = document.createElement('section');
       this.el.className = 'moon-game';
       this.el.setAttribute('aria-label', '月球小花园');
-      this.el.innerHTML = `<div class="mg-heading"><div><span class="mg-eyebrow">YOUR LITTLE GARDEN ON THE MOON</span><h2 class="mg-title">月球小花园</h2></div><div class="mg-heading-actions"><button type="button" class="mg-autocare" data-garden-action="autocare" data-mg="autocare" aria-pressed="false" aria-label="月白托管，自动播种、浇水和收获">月白托管</button><div class="mg-wallet">${starIcon}<div><span>星光零钱</span><strong data-mg="wallet">12</strong></div></div></div></div>
-        <div class="mg-scene"><canvas class="mg-canvas" role="img" aria-label="星空里漂浮的小花园，六块花田和陪伴你的奶油色小猫月白。"></canvas><div class="mg-scene-tag">第 01 号月岛 · 不慌不忙，慢慢长大</div><div class="mg-cat-status">月白的好心情 <span data-mg="happy">65</span>%<small data-mg="cat-copy">在花园里陪着你</small><i data-mg="happy-bar"></i></div>${PLOTS.map((p, i) => `<button type="button" class="mg-plot-button" data-garden-action="plot" data-index="${i}" style="left:${p.x / W * 100}%;top:${p.y / H * 100}%" aria-label="花田 ${i + 1}：空地，点击播种"><span>播种</span></button>`).join('')}</div>
-        <p class="mg-guide">选一包种子 → 点击花田播种 → 再点一次浇水 → 花开时收获星光</p>
-        <div class="mg-seeds" role="group" aria-label="选择花种">${Object.entries(SEEDS).map(([key, seed]) => `<button type="button" class="mg-seed" data-garden-action="seed" data-seed="${key}" aria-pressed="${key === 'moon'}" aria-label="选择${seed.name}种子，花费 ${seed.cost} 星光，浇水后 ${seed.time / 1000} 秒开花，收获 ${seed.yield} 星光">${flowerIcon(seed)}<span><b>${seed.name}</b><small><em>${seed.cost} ✦</em> · ${seed.time / 1000} 秒开花</small><small>收获 ${seed.yield} ✦</small></span></button>`).join('')}</div>
-        <div class="mg-shop-title">给月岛添一点喜欢的东西</div><div class="mg-shop">${Object.entries(DECOR).map(([key, item]) => `<button type="button" class="mg-shop-button" data-garden-action="decorate" data-decor="${key}">${shopIcons[key]}<span><b>${item.name}</b><small data-mg-price="${key}">${item.price} ✦ · 永久摆件</small></span></button>`).join('')}<button type="button" class="mg-shop-button" data-garden-action="feed">${shopIcons.feed}<span><b>喂月白小鱼干</b><small data-mg="feed-label">1 ✦ · 心情 +10</small></span></button></div>
-        <div class="mg-status-row"><p class="mg-live" data-mg="live" role="status" aria-live="polite">先选月白花，在一块空地播种。月白会陪你等花开。</p><button type="button" class="mg-gift" data-garden-action="gift" data-mg="gift" hidden>月白的小礼物 +2 ✦</button></div><p class="mg-note">花园会自动保存。离开后，浇过水的花朵也会慢慢长大。</p>`;
+      this.el.innerHTML = `<div class="mg-heading"><div><span class="mg-eyebrow">YOUR LITTLE GARDEN ON THE MOON</span><h2 class="mg-title">月球小花园</h2></div><div class="mg-heading-actions"><button type="button" class="mg-autocare" data-garden-action="autocare" data-mg="autocare" aria-pressed="false" aria-label="Winesun托管，自动播种、浇水和收获">Winesun托管</button><div class="mg-wallet">${starIcon}<div><span>星光零钱</span><strong data-mg="wallet">12</strong></div></div></div></div>
+        <div class="mg-scene"><canvas class="mg-canvas" role="img" aria-label="星空里漂浮的小花园，六块花田和陪伴你的奶油色小猫Winesun。"></canvas><div class="mg-scene-tag" data-mg="weather">月夜 · 不慌不忙，慢慢长大</div><div class="mg-cat-status">Winesun的好心情 <span data-mg="happy">65</span>%<small data-mg="cat-copy">在花园里陪着你</small><i data-mg="happy-bar"></i></div>${PLOTS.map((p, i) => `<button type="button" class="mg-plot-button" data-garden-action="plot" data-index="${i}" style="left:${p.x / W * 100}%;top:${p.y / H * 100}%" aria-label="花田 ${i + 1}：空地，点击播种"><span>播种</span></button>`).join('')}</div>
+        <p class="mg-guide">选花种，播种后轻轻浇水。花朵需要几分钟到一段午后，不会枯萎。</p>
+        <div class="mg-seeds" role="group" aria-label="选择花种">${Object.entries(SEEDS).map(([key, seed]) => `<button type="button" class="mg-seed" data-garden-action="seed" data-seed="${key}" aria-pressed="${key === this.selectedSeed}" title="${seed.detail}喜欢${WEATHER[seed.likes]}，适合的天气会提早 10% 开花。" aria-label="选择${seed.name}种子，花费 ${seed.cost} 星光，约 ${timeText(seed.time)}开花，收获 ${seed.yield} 星光和 ${seed.petals} 花瓣。${seed.detail}">${flowerIcon(seed)}<span><b>${seed.name}</b><small><em>${seed.cost} ✦</em> · ${timeText(seed.time)}</small><small>收获 ${seed.yield} ✦ · ${seed.petals} 花瓣</small><small class="mg-seed-detail">${seed.detail}</small></span></button>`).join('')}</div>
+        <div class="mg-shop-title">花园小物 <span class="mg-collection" data-mg="collection">0 花瓣 · 0/6 种花</span></div><div class="mg-shop">${Object.entries(DECOR).map(([key, item]) => `<button type="button" class="mg-shop-button" data-garden-action="decorate" data-decor="${key}" title="${item.detail}" aria-label="${item.name}，${item.price} 星光和 ${item.petals} 花瓣。${item.detail}">${shopIcons[key]}<span><b>${item.name}</b><small data-mg-price="${key}">${item.price} ✦ · ${item.petals} 花瓣</small><small class="mg-shop-description">${item.varieties > 1 ? `见过 ${item.varieties} 种花后可安放` : '永久留在花园里'}</small></span></button>`).join('')}<button type="button" class="mg-shop-button" data-garden-action="feed">${shopIcons.feed}<span><b>喂Winesun小鱼干</b><small data-mg="feed-label">1 ✦ · 心情 +10</small></span></button></div>
+        <div class="mg-status-row"><p class="mg-live" data-mg="live" role="status" aria-live="polite">先种一朵喜欢的花。收获时留下的花瓣，可以换一点花园小物。</p><button type="button" class="mg-gift" data-garden-action="gift" data-mg="gift" hidden>Winesun的小礼物 +2 ✦</button></div><p class="mg-note">自动保存，离开后也会生长。每新增净赚 100 星光，会把现有零钱的 20% 留成一份永久祝福。</p>`;
       this.root.appendChild(this.el);
       this.canvas = this.el.querySelector('canvas');
       this.ctx = this.canvas.getContext('2d');
       const q = n => this.el.querySelector(`[data-mg="${n}"]`);
-      this.ui = { wallet: q('wallet'), happy: q('happy'), happyBar: q('happy-bar'), catCopy: q('cat-copy'), live: q('live'), gift: q('gift'), feedLabel: q('feed-label'), autoCare: q('autocare') };
+      this.ui = { wallet: q('wallet'), happy: q('happy'), happyBar: q('happy-bar'), catCopy: q('cat-copy'), live: q('live'), gift: q('gift'), feedLabel: q('feed-label'), autoCare: q('autocare'), collection: q('collection'), weather: q('weather') };
       this.plotButtons = Array.from(this.el.querySelectorAll('[data-garden-action="plot"]'));
       this.seedButtons = Array.from(this.el.querySelectorAll('[data-garden-action="seed"]'));
       this.decorButtons = Array.from(this.el.querySelectorAll('[data-garden-action="decorate"]'));
@@ -101,9 +205,12 @@
     }
 
     bind() {
-      this.listen(this.el, 'click', e => {
-        const button = e.target.closest('[data-garden-action]');
-        if (!button || !this.el.contains(button) || this.destroyed || button.disabled) return;
+      // The desktop shell moves seed/shop controls into its sheet. Keep those
+      // actual button references usable after they leave the original section.
+      this.listen(document, 'click', e => {
+        const button = e.target.closest?.('[data-garden-action]');
+        const owned = button && (this.el.contains(button) || this.seedButtons.includes(button) || this.decorButtons.includes(button) || button === this.feedButton || button === this.ui.gift);
+        if (!owned || this.destroyed || button.disabled) return;
         const action = button.dataset.gardenAction;
         if (action === 'seed') this.selectSeed(button.dataset.seed);
         else if (action === 'plot') this.tend(Number(button.dataset.index));
@@ -114,87 +221,123 @@
       });
       this.listen(document, 'visibilitychange', () => {
         this.lastFrame = null;
-        if (!document.hidden) { this.runAutocare(); this.refresh(); this.render(); }
+        if (!document.hidden) { this.syncFromStorage(); this.environmentTick(); this.runAutocare(); this.refresh(); this.render(); }
       });
+      this.listen(window, 'storage', e => { if (e.key === STORAGE_KEY) { this.syncFromStorage(); this.refresh(); if (!document.hidden) this.render(); } });
       if (typeof ResizeObserver !== 'function') this.listen(window, 'resize', () => this.resize());
     }
 
     selectSeed(key) {
       if (!Object.hasOwn(SEEDS, key)) return;
-      this.selectedSeed = key;
+      this.settleBeforeAction(); this.selectedSeed = key; this.data.selectedSeed = key;
       this.seedButtons.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.seed === key)));
-      this.say(`选好了${SEEDS[key].name}。找一块空地，把它种下来吧。`);
+      this.say(this.autocare ? `选好了${SEEDS[key].name}。Winesun会在下一次收获后换种它，不用挖掉现有的花。` : `选好了${SEEDS[key].name}。${SEEDS[key].detail}`);
+      this.save(); this.refresh();
+    }
+
+    settleBeforeAction(now = Date.now()) {
+      this.syncFromStorage();
+      // A delayed background timer must not apply today's seed choice or
+      // purchase to yesterday's harvests. Close the old interval first.
+      if (this.data.autoCare) this.runAutocare(now, false);
+    }
+
+    environmentTick(now = Date.now()) {
+      if (this.destroyed || this.data.autoCare || weatherAt(now) !== 'rain') return;
+      let watered = 0;
+      for (const plot of this.data.plots) if (plot && !plot.wateredAt && SEEDS[plot.type].rainWater) { this.water(plot, now); watered += 1; }
+      if (watered) { this.save(); this.say(`细雨替 ${watered} 朵喜欢雨水的小花浇了水。你不必赶回来。`); }
     }
 
     phase(plot, now = Date.now()) {
       if (!plot) return 'empty';
       if (!plot.wateredAt) return 'dry';
-      return now - plot.wateredAt >= SEEDS[plot.type].time ? 'ready' : 'growing';
+      return now >= (plot.readyAt || plot.wateredAt + SEEDS[plot.type].time) ? 'ready' : 'growing';
     }
 
     tend(index) {
       if (!Number.isInteger(index) || index < 0 || index >= 6 || this.destroyed) return;
-      const now = Date.now(), plot = this.data.plots[index], phase = this.phase(plot, now), pos = PLOTS[index];
+      const now = Date.now(); this.settleBeforeAction(now);
+      const plot = this.data.plots[index], phase = this.phase(plot, now), pos = PLOTS[index];
+      let harvestEvent = null, blessingEvent = null;
       if (phase === 'empty') {
         const seed = SEEDS[this.selectedSeed];
-        if (this.data.wallet < seed.cost) { this.say(`这包种子需要 ${seed.cost} 星光。可以先收获花朵，或收下月白的小礼物。`); this.refresh(); return; }
+        if (this.data.wallet < seed.cost) { this.say(`这包种子需要 ${seed.cost} 星光。可以先收获花朵，或收下Winesun的小礼物。`); this.refresh(); return; }
         this.data.wallet -= seed.cost;
-        this.data.plots[index] = { type: this.selectedSeed, plantedAt: now, wateredAt: 0 };
+        this.data.plots[index] = this.newPlot(this.selectedSeed, now);
         this.say(`${seed.name}种下啦。再点这块花田，给它一点水。`);
         this.burst(pos.x, pos.y - 15, '#c3b18f', 7);
         this.sound('chime');
       } else if (phase === 'dry') {
-        plot.wateredAt = now;
-        this.say(`水浇好啦。${SEEDS[plot.type].name}会在 ${SEEDS[plot.type].time / 1000} 秒后开花，可以先照料别的花。`);
+        this.water(plot, now);
+        this.say(`水浇好啦。${SEEDS[plot.type].name}会用大约 ${timeText(plot.readyAt - now)}慢慢开花。${plot.weather === SEEDS[plot.type].likes ? '今天的天气正合它心意。' : '去忙自己的事也没关系。'}`);
         this.burst(pos.x, pos.y - 18, '#b4c8df', 11);
         this.sound('chime');
       } else if (phase === 'growing') {
-        const seconds = Math.max(1, Math.ceil((SEEDS[plot.type].time - (now - plot.wateredAt)) / 1000));
-        this.say(`${SEEDS[plot.type].name}还在慢慢长大，大约再等 ${seconds} 秒。不着急。`);
-        return;
+        const seed = SEEDS[plot.type];
+        if (seed.extraWater && !plot.extraWaterAt && now - plot.wateredAt >= MINUTE) {
+          plot.extraWaterAt = now; plot.readyAt = Math.max(now, plot.readyAt - Math.round(seed.time * .05));
+          this.say(`${seed.name}喝到了第二口水，花期提早了一点。叶尖亮起一颗小露珠。`);
+          this.burst(pos.x, pos.y - 28, '#b7d1ca', 10); this.sound('chime');
+        } else {
+          this.say(`${seed.name}还在慢慢长大，大约再等 ${timeText(plot.readyAt - now)}。${seed.detail}`);
+          if (seed.shape === 'bell') this.sound('chime');
+          this.burst(pos.x, pos.y - 28, seed.petal, 4); this.render();
+          return;
+        }
       } else {
         const seed = SEEDS[plot.type];
-        this.data.wallet += seed.yield;
-        this.data.happiness = Math.min(100, this.data.happiness + 2);
+        const reward = this.recordHarvest(plot, now);
+        this.data.wallet = Math.min(1000000, this.data.wallet + reward.stars);
+        blessingEvent = this.creditBlessings(plot, reward);
         this.data.plots[index] = null;
-        this.say(`收获了${seed.name}，得到 ${seed.yield} 星光。月白闻了闻花香，心情也变好了。`);
+        this.say(`收获了${seed.name}：${reward.stars} 星光、${reward.petals} 片花瓣。${plot.type === 'dream' ? '小铃轻响，Winesun心情 +4。' : '花园手记又留下了一小页。'}`);
+        if (blessingEvent.count) this.say(`把 ${blessingEvent.starlight} 星光留成了一份祝福。已经有 ${blessingEvent.totalCount} 份温暖陪着花园。`);
         this.burst(pos.x, pos.y - 31, '#efd6a5', 18);
         this.sound('collect');
-        if (this.onComplete) { try { this.onComplete({ type: 'harvest', seed: plot.type, flower: seed.name, starlight: seed.yield, wallet: this.data.wallet }); } catch (_) {} }
+        harvestEvent = { type: 'harvest', seed: plot.type, flower: seed.name, starlight: reward.stars, petals: reward.petals, wallet: this.data.wallet };
       }
       this.save(); this.refresh(); this.render();
+      // Notify only after the harvest, deduction and ledger are atomically saved.
+      if (harvestEvent) this.emitComplete(harvestEvent);
+      if (blessingEvent?.count) this.emitComplete(blessingEvent);
     }
 
     decorate(key) {
+      this.settleBeforeAction();
       if (!Object.hasOwn(DECOR, key) || this.data.decorations[key]) return;
       const item = DECOR[key];
+      if (this.varietyCount() < item.varieties) { this.say(`${item.name}想认识 ${item.varieties} 种花。慢慢种一点不同的花，开过花就会记住。`); return; }
+      if (this.data.petals < item.petals) { this.say(`${item.name}需要 ${item.petals} 片收获留下的花瓣。已经有 ${this.data.petals} 片，不用急着攒。`); return; }
       if (this.data.wallet < item.price) { this.say(`${item.name}需要 ${item.price} 星光，花朵会帮你慢慢攒够。`); return; }
       this.data.wallet -= item.price;
+      this.data.petals -= item.petals;
       this.data.decorations[key] = true;
       this.say(`${item.name}安放好了。从此，月岛又多了一处温暖。`);
-      this.burst(key === 'bench' ? 161 : key === 'lantern' ? 503 : 551, key === 'lantern' ? 161 : 264, '#efcaa2', 15);
+      const where = { bench: [161, 284], lantern: [513, 156], mushroom: [566, 226], windchime: [210, 177], birdbath: [139, 286], mailbox: [120, 211], trellis: [347, 152] }[key];
+      this.burst(where[0], where[1], '#efcaa2', 15);
       this.sound('chime'); this.save(); this.refresh(); this.render();
     }
 
     feed() {
-      const now = Date.now();
-      if (this.data.happiness >= 100) { this.say('月白已经很满足啦，正幸福地晒着月光。'); return; }
-      if (now - this.data.feedAt < 30000) { this.say('月白正在慢慢嚼小鱼干，等它吃完再喂吧。'); return; }
-      if (this.data.wallet < 1) { this.say('先收获一点星光，再请月白吃小鱼干吧。'); return; }
+      const now = Date.now(); this.settleBeforeAction(now);
+      if (this.data.happiness >= 100) { this.say('Winesun已经很满足啦，正幸福地晒着月光。'); return; }
+      if (now - this.data.feedAt < 5 * MINUTE) { this.say('Winesun正在慢慢嚼小鱼干，过一会儿再喂吧。'); return; }
+      if (this.data.wallet < 1) { this.say('先收获一点星光，再请Winesun吃小鱼干吧。'); return; }
       this.data.wallet -= 1;
       this.data.happiness = Math.min(100, this.data.happiness + 10);
       this.data.feedAt = now;
-      this.say('月白吃到了小鱼干，轻轻蹭了蹭你的手。好心情 +10。');
+      this.say('Winesun吃到了小鱼干，轻轻蹭了蹭你的手。好心情 +10。');
       this.burst(551, 259, '#e5b0bd', 12);
       this.sound('chime'); this.save(); this.refresh(); this.render();
     }
 
     gift() {
-      const now = Date.now();
+      const now = Date.now(); this.settleBeforeAction(now);
       if (this.data.wallet >= 2 || this.data.plots.some(p => this.phase(p, now) === 'ready') || now - this.data.giftAt < 60000) return;
       this.data.wallet += 2;
       this.data.giftAt = now;
-      this.say('月白从口袋里找出了两颗星光。种一朵月白花，重新慢慢攒起来吧。');
+      this.say('Winesun从口袋里找出了两颗星光。种一朵月光花，重新慢慢攒起来吧。');
       this.sound('chime'); this.save(); this.refresh();
     }
 
@@ -202,6 +345,7 @@
 
     setAutocare(enabled) {
       if (this.destroyed) return false;
+      this.syncFromStorage();
       const value = Boolean(enabled), now = Date.now();
       if (value === this.data.autoCare) return value;
       if (this.data.autoCare) this.runAutocare(now);
@@ -209,10 +353,10 @@
       this.data.autoAt = now;
       if (value) {
         const summary = this.runAutocare(now);
-        if (!summary || !summary.flowers) this.say('月白托管开启啦。它会自动播种、浇水和收获，你可以安心忙自己的事。');
+        if (!summary || !summary.flowers) this.say('Winesun托管开启啦。它会自动播种、浇水和收获，你可以安心忙自己的事。');
       } else {
         this.save();
-        this.say('月白托管暂停了。花朵依然会长大，等你亲手收获。');
+        this.say('Winesun托管暂停了。花朵依然会长大，等你亲手收获。');
       }
       this.refresh(); this.render();
       return value;
@@ -220,57 +364,95 @@
 
     backgroundTick() {
       if (this.destroyed) return null;
+      this.syncFromStorage();
       if (this.data.autoCare) return this.runAutocare(Date.now(), false);
+      this.environmentTick();
       this.refresh();
       return null;
     }
 
     runAutocare(now = Date.now(), paint = true) {
+      this.syncFromStorage();
       if (this.destroyed || !this.data.autoCare) return null;
-      // Only six arithmetic calculations are needed, even after a long absence.
-      // autoAt and the replanted timestamps are saved together, preventing replayed income.
-      const previous = Math.min(this.data.autoAt || now, now);
-      const intervalStart = Math.max(previous, now - 24 * 60 * 60 * 1000);
-      let flowers = 0, income = 0, planted = 0, watered = 0;
+      // Weather is sampled when each new flower is watered. The shortest cycle
+      // is 7.2 minutes: the 24-hour cap means fewer than 1,210 bounded iterations.
+      // Plot deadlines + ledger through/revision are committed in one JSON write.
+      const previous = Math.min(Math.max(this.data.autoAt || now, this.data.ledger.through || 0), now);
+      const intervalStart = Math.max(previous, now - OFFLINE_LIMIT);
+      const walletBefore = this.data.wallet, petalsBefore = this.data.petals;
+      const blessingBatch = { type: 'blessing', count: 0, totalCount: this.data.blessings.count, starlight: 0, offline: now - previous > 5000 };
+      let flowers = 0, planted = 0, watered = 0;
       for (let i = 0; i < 6; i++) {
         const plot = this.data.plots[i];
         if (!plot) continue;
-        const seed = SEEDS[plot.type];
         if (!plot.wateredAt) {
-          plot.wateredAt = Math.max(intervalStart, Math.min(plot.plantedAt, now));
+          this.water(plot, Math.max(intervalStart, Math.min(plot.plantedAt, now)));
           watered += 1;
         }
-        const firstReady = Math.max(plot.wateredAt + seed.time, intervalStart);
-        if (firstReady > now) continue;
-        const count = 1 + Math.floor((now - firstReady) / seed.time);
-        const before = this.data.wallet;
-        this.data.wallet = Math.min(1000000, this.data.wallet + count * (seed.yield - seed.cost));
-        income += this.data.wallet - before;
-        this.data.happiness = Math.min(100, this.data.happiness + count * 2);
-        const replantedAt = firstReady + (count - 1) * seed.time;
-        this.data.plots[i] = { type: plot.type, plantedAt: replantedAt, wateredAt: replantedAt };
-        flowers += count;
       }
-      // An exhausted garden can restart itself with the same modest cat gift.
-      if (this.data.wallet < 2 && this.data.plots.some(p => !p) && now - this.data.giftAt >= 60000) {
-        this.data.wallet += 2; this.data.giftAt = now;
-      }
-      for (let i = 0; i < 6; i++) {
-        if (this.data.plots[i]) continue;
-        const type = this.data.wallet >= SEEDS[this.selectedSeed].cost ? this.selectedSeed : 'moon';
-        if (this.data.wallet < SEEDS[type].cost) break;
-        this.data.wallet -= SEEDS[type].cost;
-        this.data.plots[i] = { type, plantedAt: now, wateredAt: now };
-        planted += 1;
+      // Settle harvests, empty-plot planting and gift cooldowns in time order.
+      // Waiting until the end to fill empty plots would underpay a partly
+      // planted offline garden compared with the same garden left running.
+      let eventAt = intervalStart;
+      for (let cycle = 0; cycle < 1536; cycle++) {
+        for (let i = 0; i < 6; i++) {
+          const plot = this.data.plots[i];
+          if (!plot) continue;
+          const seed = SEEDS[plot.type];
+          if (seed.extraWater && !plot.extraWaterAt && now - plot.wateredAt >= MINUTE && plot.wateredAt + MINUTE < plot.readyAt) {
+            plot.extraWaterAt = plot.wateredAt + MINUTE;
+            plot.readyAt -= Math.round(seed.time * .05);
+          }
+          const due = Math.max(plot.readyAt, intervalStart);
+          if (due > eventAt) continue;
+          const reward = this.recordHarvest(plot, eventAt);
+          this.data.wallet = Math.min(1000000, this.data.wallet + reward.stars);
+          const blessing = this.creditBlessings(plot, reward);
+          blessingBatch.count += blessing.count; blessingBatch.starlight += blessing.starlight;
+          const type = this.data.wallet >= SEEDS[this.selectedSeed].cost ? this.selectedSeed : 'moon';
+          this.data.wallet -= SEEDS[type].cost;
+          this.data.plots[i] = this.newPlot(type, eventAt, true);
+          flowers += 1;
+        }
+        // A modest recovery gift only funds an empty plot, and its timestamp
+        // is committed with the harvest ledger so reopening cannot repeat it.
+        if (this.data.wallet < 2 && this.data.plots.some(p => !p) && eventAt - this.data.giftAt >= MINUTE) {
+          this.data.wallet += 2; this.data.giftAt = eventAt;
+        }
+        for (let i = 0; i < 6; i++) {
+          if (this.data.plots[i]) continue;
+          const type = this.data.wallet >= SEEDS[this.selectedSeed].cost ? this.selectedSeed : 'moon';
+          if (this.data.wallet < SEEDS[type].cost) break;
+          this.data.wallet -= SEEDS[type].cost;
+          this.data.plots[i] = this.newPlot(type, eventAt, true);
+          planted += 1;
+        }
+        let nextAt = Infinity;
+        for (const plot of this.data.plots) if (plot) {
+          const seed = SEEDS[plot.type];
+          // Compute the one permitted extra watering before selecting the
+          // next deadline, including flowers planted earlier in this batch.
+          if (seed.extraWater && !plot.extraWaterAt && now - plot.wateredAt >= MINUTE && plot.wateredAt + MINUTE < plot.readyAt) {
+            plot.extraWaterAt = plot.wateredAt + MINUTE;
+            plot.readyAt -= Math.round(seed.time * .05);
+          }
+          nextAt = Math.min(nextAt, Math.max(plot.readyAt, intervalStart));
+        }
+        if (this.data.wallet < 2 && this.data.plots.some(p => !p)) nextAt = Math.min(nextAt, Math.max(eventAt, this.data.giftAt + MINUTE));
+        if (nextAt > now) break;
+        eventAt = nextAt;
       }
       this.data.autoAt = now;
       this.save();
-      const summary = { type: 'autocare', flowers, starlight: income, wallet: this.data.wallet, planted, watered, offline: now - previous > 5000 };
+      blessingBatch.totalCount = this.data.blessings.count;
+      const summary = { type: 'autocare', flowers, starlight: this.data.wallet - walletBefore, petals: this.data.petals - petalsBefore, wallet: this.data.wallet, planted, watered, offline: now - previous > 5000 };
       this.lastAutocareSummary = summary;
-      if (flowers) this.say(`月白帮你照料了 ${flowers} 朵花，星光零钱现在有 ${this.data.wallet} 颗。`);
-      else if (planted || watered) this.say(`月白正在照料花田，会替你浇水、收获，再种下新的小花。`);
+      if (flowers) this.say(`Winesun照料了 ${flowers} 朵花，留下 ${summary.petals} 片花瓣。花田里又种下了新的小花。`);
+      else if (planted || watered) this.say('Winesun浇好了水。花朵会用一段安静的时光慢慢长大。');
+      if (blessingBatch.count) this.say(`花园多了 ${blessingBatch.count} 份祝福，将 ${blessingBatch.starlight} 星光留成了温暖。`);
       // Auto-care is quiet by default; integrations may request one summary per batch.
       if (flowers && this.notifyAutocare && this.onComplete) { try { this.onComplete(summary); } catch (_) {} }
+      if (blessingBatch.count) this.emitComplete(blessingBatch);
       this.refresh();
       if (paint && !document.hidden) this.render();
       return summary;
@@ -280,31 +462,36 @@
       if (this.destroyed) return;
       const now = Date.now();
       this.ui.wallet.textContent = String(this.data.wallet);
+      this.ui.collection.textContent = `${this.data.petals} 花瓣 · ${this.varietyCount()}/6 种花`;
+      this.ui.weather.textContent = `${WEATHER[weatherAt(now)]} · 不慌不忙，慢慢长大`;
+      this.seedButtons.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.seed === this.selectedSeed)));
       this.ui.autoCare.setAttribute('aria-pressed', String(this.data.autoCare));
-      this.ui.autoCare.textContent = this.data.autoCare ? '月白托管 · 开' : '月白托管';
+      this.ui.autoCare.textContent = this.data.autoCare ? 'Winesun托管 · 开' : 'Winesun托管';
       this.ui.happy.textContent = String(this.data.happiness);
       this.ui.happyBar.style.width = `${this.data.happiness * .74}px`;
       this.ui.catCopy.textContent = this.data.happiness >= 90 ? '幸福地眯起了眼睛' : this.data.happiness >= 70 ? '尾巴晃呀晃，心情很好' : '在花园里陪着你';
       for (let i = 0; i < 6; i++) {
         const plot = this.data.plots[i], stage = this.phase(plot, now), button = this.plotButtons[i];
         button.dataset.stage = stage;
-        const remaining = stage === 'growing' ? Math.max(1, Math.ceil((SEEDS[plot.type].time - now + plot.wateredAt) / 1000)) : 0;
-        const label = stage === 'empty' ? '播种' : stage === 'dry' ? '浇水' : stage === 'ready' ? '收获 ✦' : `${remaining}s`;
+        const progress = plot ? this.plotProgress(plot, now) : 0;
+        const canWater = stage === 'growing' && SEEDS[plot.type].extraWater && !plot.extraWaterAt && now - plot.wateredAt >= MINUTE;
+        const label = stage === 'empty' ? '播种' : stage === 'dry' ? '浇水' : stage === 'ready' ? '收获 ✦' : canWater ? '补水' : progress < .3 ? '幼芽' : progress < .75 ? '长叶' : '含苞';
         button.querySelector('span').textContent = label;
-        button.setAttribute('aria-label', `花田 ${i + 1}：${stage === 'empty' ? `空地，点击种下${SEEDS[this.selectedSeed].name}` : stage === 'dry' ? `${SEEDS[plot.type].name}需要浇水，点击浇水` : stage === 'ready' ? `${SEEDS[plot.type].name}开花了，点击收获 ${SEEDS[plot.type].yield} 星光` : `${SEEDS[plot.type].name}生长中，约 ${remaining} 秒后开花`}`);
+        button.setAttribute('aria-label', `花田 ${i + 1}：${stage === 'empty' ? `空地，点击种下${SEEDS[this.selectedSeed].name}` : stage === 'dry' ? `${SEEDS[plot.type].name}需要浇水，点击浇水` : stage === 'ready' ? `${SEEDS[plot.type].name}开花了，点击收获 ${SEEDS[plot.type].yield} 星光和花瓣` : `${SEEDS[plot.type].name}生长中，约 ${timeText(plot.readyAt - now)}后开花${canWater ? '，可以点击补水，提早一点开花' : ''}`}`);
       }
       for (const button of this.decorButtons) {
         const key = button.dataset.decor, owned = this.data.decorations[key];
         button.dataset.owned = String(owned); button.disabled = owned;
-        button.querySelector('small').textContent = owned ? '已经在花园里啦' : `${DECOR[key].price} ✦ · 永久摆件`;
+        button.dataset.locked = String(!owned && this.varietyCount() < DECOR[key].varieties);
+        button.querySelector('small').textContent = owned ? '已经在花园里啦' : `${DECOR[key].price} ✦ · ${DECOR[key].petals} 花瓣`;
       }
-      const eating = now - this.data.feedAt < 30000;
+      const eating = now - this.data.feedAt < 5 * MINUTE;
       this.feedButton.disabled = this.data.happiness >= 100 || eating;
-      this.ui.feedLabel.textContent = this.data.happiness >= 100 ? '月白已经很满足啦' : eating ? '正慢慢吃小鱼干' : '1 ✦ · 心情 +10';
+      this.ui.feedLabel.textContent = this.data.happiness >= 100 ? 'Winesun已经很满足啦' : eating ? '正慢慢吃小鱼干' : '1 ✦ · 心情 +10';
       const needsGift = this.data.wallet < 2 && !this.data.plots.some(p => this.phase(p, now) === 'ready');
       this.ui.gift.hidden = !needsGift;
       this.ui.gift.disabled = now - this.data.giftAt < 60000;
-      this.ui.gift.textContent = this.ui.gift.disabled ? `小礼物 ${Math.ceil((60000 - now + this.data.giftAt) / 1000)}s 后回来` : '月白的小礼物 +2 ✦';
+      this.ui.gift.textContent = this.ui.gift.disabled ? `小礼物 ${Math.ceil((60000 - now + this.data.giftAt) / 1000)}s 后回来` : 'Winesun的小礼物 +2 ✦';
     }
 
     say(message) { this.ui.live.textContent = message; }
@@ -314,9 +501,11 @@
 
     start() {
       if (this.destroyed) return;
-      this.state = 'running'; this.lastFrame = null; this.lastDraw = null; this.runAutocare(); this.refresh(); this.resize();
+      this.state = 'running'; this.lastFrame = null; this.lastDraw = null; this.syncFromStorage(); this.environmentTick(); this.runAutocare(); this.refresh(); this.resize();
       if (!this.timer) this.timer = setInterval(() => {
+        this.syncFromStorage();
         if (this.data.autoCare && Date.now() - this.data.autoAt >= 2000) this.runAutocare();
+        else if (!this.data.autoCare) this.environmentTick();
         if (!document.hidden) { this.refresh(); if (this.reducedMotion) this.render(); }
       }, 500);
       if (!this.frameId && !this.reducedMotion) this.frameId = requestAnimationFrame(t => this.frame(t));
@@ -335,6 +524,15 @@
       if (rect.width < 1 || rect.height < 1) return;
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       this.canvas.width = Math.round(rect.width * dpr); this.canvas.height = Math.round(rect.height * dpr);
+      const scale = Math.min(rect.width / W, rect.height / H);
+      this.viewport = { width: rect.width, height: rect.height, dpr, scale, offsetX: (rect.width - W * scale) / 2, offsetY: (rect.height - H * scale) / 2 };
+      for (let i = 0; i < this.plotButtons.length; i++) {
+        const button = this.plotButtons[i], plot = PLOTS[i];
+        button.style.left = `${this.viewport.offsetX + plot.x * scale}px`;
+        button.style.top = `${this.viewport.offsetY + plot.y * scale}px`;
+        button.style.width = `${W * .125 * scale}px`;
+        button.style.height = `${H * .16 * scale}px`;
+      }
       this.render();
     }
     frame(timestamp) {
@@ -402,30 +600,50 @@
       ctx.strokeStyle = '#625943'; ctx.lineWidth = 1.3; ctx.beginPath(); ctx.ellipse(p.x, p.y, 37, 17, 0, 0, Math.PI * 2); ctx.stroke();
       ctx.strokeStyle = 'rgba(213,181,168,.17)'; ctx.lineWidth = 1; for (const dy of [-7, 0, 7]) { ctx.beginPath(); ctx.moveTo(p.x - 23, p.y + dy); ctx.quadraticCurveTo(p.x, p.y + dy + 3, p.x + 23, p.y + dy); ctx.stroke(); }
       if (!plot) { this.ellipse(ctx, p.x - 11, p.y - 4, 2, 1.2, '#b09b79'); this.ellipse(ctx, p.x + 14, p.y + 5, 2.5, 1.3, '#c2aa83'); return; }
-      const seed = SEEDS[plot.type], stage = this.phase(plot, now), progress = !plot.wateredAt ? .07 : clamp((now - plot.wateredAt) / seed.time, .1, 1);
+      const seed = SEEDS[plot.type], stage = this.phase(plot, now), progress = this.plotProgress(plot, now);
       if (stage !== 'dry') this.ellipse(ctx, p.x, p.y, 30, 13, 'rgba(61,68,46,.12)');
       const positions = progress > .45 ? [{ x: 0, y: -4, size: 1 }, { x: -13, y: 0, size: .7 }, { x: 14, y: 2, size: .77 }] : [{ x: 0, y: -4, size: 1 }];
       for (const f of positions) {
-        const h = (11 + 32 * progress) * f.size, x = p.x + f.x, y = p.y + f.y;
+        const h = (11 + 32 * progress) * f.size * seed.height, x = p.x + f.x, y = p.y + f.y;
         const sway = this.reducedMotion ? 0 : Math.sin(this.sceneTime * 1.2 + index + f.x * .018) * 4.2 * progress;
         ctx.strokeStyle = seed.leaf; ctx.lineWidth = 2 * f.size; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(x, y); ctx.quadraticCurveTo(x - 3, y - h * .5, x + sway, y - h); ctx.stroke();
         ctx.fillStyle = seed.leaf; ctx.beginPath(); ctx.moveTo(x, y - h * .35); ctx.quadraticCurveTo(x - 13 * f.size, y - h * .58, x - 12 * f.size, y - h * .3); ctx.quadraticCurveTo(x - 5, y - h * .2, x, y - h * .35); ctx.fill(); ctx.beginPath(); ctx.moveTo(x, y - h * .62); ctx.quadraticCurveTo(x + 12 * f.size, y - h * .89, x + 11 * f.size, y - h * .58); ctx.quadraticCurveTo(x + 5, y - h * .5, x, y - h * .62); ctx.fill();
         const bloom = clamp((progress - .55) / .45, 0, 1), radius = (3 + bloom * 7) * f.size;
         ctx.save(); ctx.translate(x + sway, y - h);
-        if (plot.type === 'dream') {
+        if (seed.shape === 'bell') {
           ctx.fillStyle = seed.petal; ctx.beginPath(); ctx.moveTo(-radius * .6, -radius * .5); ctx.bezierCurveTo(-radius * 1.1, -radius * 1.6, radius * 1.1, -radius * 1.6, radius * .6, -radius * .5); ctx.lineTo(radius, radius * .7); ctx.quadraticCurveTo(0, radius * 1.15, -radius, radius * .7); ctx.closePath(); ctx.fill(); this.ellipse(ctx, 0, radius * .8, radius * .6, 1.6, seed.center);
-        } else if (plot.type === 'peach') {
+        } else if (seed.shape === 'star') {
           this.star(ctx, 0, 0, radius * 1.15, seed.petal); this.ellipse(ctx, 0, 0, radius * .3, radius * .3, seed.center);
+        } else if (seed.shape === 'cup') {
+          ctx.fillStyle = seed.petal; ctx.beginPath(); ctx.moveTo(-radius, -radius * .7); ctx.quadraticCurveTo(-radius * .4, -radius * .2, -radius * .4, radius * .2); ctx.lineTo(0, -radius * 1.2); ctx.lineTo(radius * .4, radius * .2); ctx.quadraticCurveTo(radius * .4, -radius * .2, radius, -radius * .7); ctx.quadraticCurveTo(radius * 1.1, radius * 1.1, 0, radius); ctx.quadraticCurveTo(-radius * 1.1, radius * 1.1, -radius, -radius * .7); ctx.fill(); this.ellipse(ctx, 0, radius * .15, radius * .23, radius * .38, seed.center);
+        } else if (seed.shape === 'sun') {
+          if (!this.reducedMotion) ctx.rotate(Math.sin(this.sceneTime * .25) * .13);
+          for (let j = 0; j < 12; j++) { ctx.save(); ctx.rotate(j * Math.PI / 6); this.ellipse(ctx, 0, -radius * .75, radius * .23, radius * .65, seed.petal); ctx.restore(); }
+          this.ellipse(ctx, 0, 0, radius * .58, radius * .58, seed.center);
+          for (let j = 0; j < 4; j++) this.ellipse(ctx, (j % 2 ? 1 : -1) * radius * .2, (j < 2 ? -1 : 1) * radius * .2, .7, .7, '#d4bf8d');
+        } else if (seed.shape === 'orchid') {
+          ctx.fillStyle = seed.petal;
+          for (let j = 0; j < 4; j++) { ctx.save(); ctx.rotate(j * Math.PI / 2 + .35); ctx.beginPath(); ctx.moveTo(0, 1); ctx.bezierCurveTo(-radius, -radius * .9, -radius * .2, -radius * 1.4, 0, -radius * 1.2); ctx.bezierCurveTo(radius * .6, -radius, radius * .7, -radius * .2, 0, 1); ctx.fill(); ctx.restore(); }
+          this.ellipse(ctx, 0, 1, radius * .27, radius * .34, seed.center);
         } else {
           for (let j = 0; j < 5; j++) { ctx.save(); ctx.rotate(j * Math.PI * 2 / 5); this.ellipse(ctx, 0, -radius * .52, radius * .45, radius * .7, seed.petal); ctx.restore(); } this.ellipse(ctx, 0, 0, radius * .36, radius * .36, seed.center);
         }
         ctx.restore();
+        if (plot.type === 'dew' && plot.wateredAt) { this.ellipse(ctx, x + 9 * f.size, y - h * .62, 1.7 * f.size, 2.8 * f.size, '#d1e0d1'); this.ellipse(ctx, x + 8.7 * f.size, y - h * .65, .65, .65, '#f5eed8'); }
       }
       if (stage === 'ready') { this.glow(ctx, p.x, p.y - 31, 34, 'rgba(244,215,169,.14)'); for (let j = 0; j < 3; j++) { const a = this.reducedMotion ? j * 2.1 : this.sceneTime * .5 + j * 2.1; this.star(ctx, p.x + Math.cos(a) * 24, p.y - 27 + Math.sin(a) * 15, 2.2, '#ecdab8'); } }
       if (stage === 'dry') { ctx.fillStyle = '#bdd4ce'; ctx.beginPath(); ctx.moveTo(p.x + 22, p.y - 33); ctx.bezierCurveTo(p.x + 16, p.y - 24, p.x + 27, p.y - 21, p.x + 27, p.y - 27); ctx.quadraticCurveTo(p.x + 27, p.y - 29, p.x + 22, p.y - 33); ctx.fill(); }
+      if (plot.type === 'lull' && progress > .8) {
+        const flutter = this.reducedMotion ? 1 : 1 + Math.sin(this.sceneTime * 4) * .35;
+        const mx = p.x + 19 + (this.reducedMotion ? 0 : Math.sin(this.sceneTime * .75 + index) * 8), my = p.y - 52 + (this.reducedMotion ? 0 : Math.cos(this.sceneTime * .9 + index) * 5);
+        this.ellipse(ctx, mx - 2.5, my, 3 * flutter, 1.8, '#e7e5c9'); this.ellipse(ctx, mx + 2.5, my, 3 * flutter, 1.8, '#e7e5c9'); this.ellipse(ctx, mx, my, .8, 2, '#91876a');
+      }
     }
 
     decorations(ctx) {
+      if (this.data.decorations.trellis) {
+        ctx.save(); ctx.translate(349, 163); ctx.strokeStyle = '#968462'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(-47, 10); ctx.lineTo(-47, -21); ctx.bezierCurveTo(-47, -60, 47, -60, 47, -21); ctx.lineTo(47, 10); ctx.stroke(); ctx.lineWidth = 1; for (let x = -31; x <= 31; x += 16) { ctx.beginPath(); ctx.moveTo(x, -39); ctx.lineTo(x, 8); ctx.stroke(); } for (let y = -28; y <= 0; y += 12) { ctx.beginPath(); ctx.moveTo(-43, y); ctx.lineTo(43, y); ctx.stroke(); } for (let j = 0; j < 10; j++) { const a = Math.PI + j * Math.PI / 9; this.ellipse(ctx, Math.cos(a) * 48, -16 + Math.sin(a) * 35, 6, 3, j % 2 ? '#81976c' : '#93a777'); } ctx.restore();
+      }
       if (this.data.decorations.bench) {
         ctx.save(); ctx.translate(177, 287); ctx.rotate(.1); ctx.fillStyle = '#8c775a'; ctx.fillRect(-34, -14, 65, 12); ctx.fillStyle = '#bda67b'; ctx.fillRect(-37, -1, 71, 7); ctx.strokeStyle = '#dac9a0'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(-31, -9); ctx.lineTo(29, -9); ctx.stroke(); ctx.strokeStyle = '#6f654b'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(-28, 5); ctx.lineTo(-29, 15); ctx.moveTo(26, 5); ctx.lineTo(25, 15); ctx.stroke(); ctx.restore();
       }
@@ -435,6 +653,16 @@
       }
       if (this.data.decorations.mushroom) {
         ctx.save(); ctx.translate(566, 248); this.ellipse(ctx, 0, 16, 28, 8, 'rgba(89,63,91,.18)'); ctx.fillStyle = '#ddcfb0'; ctx.beginPath(); ctx.roundRect(-16, -9, 31, 28, 6); ctx.fill(); ctx.fillStyle = '#b08478'; ctx.beginPath(); ctx.moveTo(-28, -7); ctx.bezierCurveTo(-29, -46, 28, -46, 29, -7); ctx.quadraticCurveTo(0, 2, -28, -7); ctx.fill(); this.ellipse(ctx, -11, -23, 5, 3, '#eadbb8'); this.ellipse(ctx, 12, -18, 6, 3.5, '#eadbb8'); this.ellipse(ctx, 2, -31, 4, 2.5, '#eadbb8'); ctx.fillStyle = '#716047'; ctx.beginPath(); ctx.roundRect(-5, 3, 11, 16, [5, 5, 0, 0]); ctx.fill(); this.ellipse(ctx, 10, 4, 3, 3, '#e6c8a0'); ctx.restore();
+      }
+      if (this.data.decorations.windchime) {
+        const sway = this.reducedMotion ? 0 : Math.sin(this.sceneTime * .9) * 3;
+        ctx.save(); ctx.translate(204, 185); ctx.strokeStyle = '#8a795a'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-11, 0); ctx.lineTo(-11, -42); ctx.lineTo(17, -42); ctx.stroke(); ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(0, -41); ctx.lineTo(sway, -18); ctx.moveTo(11, -41); ctx.lineTo(11 + sway, -11); ctx.stroke(); this.ellipse(ctx, sway, -16, 4, 5, '#c6b78b'); this.ellipse(ctx, 11 + sway, -9, 3.5, 5, '#9bb092'); ctx.restore();
+      }
+      if (this.data.decorations.birdbath) {
+        ctx.save(); ctx.translate(140, 300); ctx.strokeStyle = '#8a8c74'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -16); ctx.stroke(); this.ellipse(ctx, 0, 1, 11, 3, '#a0a58b'); this.ellipse(ctx, 0, -17, 18, 6, '#a7b2a0'); this.ellipse(ctx, 0, -19, 14, 3, '#83a39b'); this.ellipse(ctx, 11, -27, 7, 5, '#d6bf8d'); this.ellipse(ctx, 16, -30, 3.6, 3.7, '#dfcda5'); this.ellipse(ctx, 7, -27, 3.7, 2.6, '#b49472'); this.ellipse(ctx, 17, -30, .65, .65, '#4a4a37'); ctx.fillStyle = '#99754d'; ctx.beginPath(); ctx.moveTo(19, -29); ctx.lineTo(23, -28); ctx.lineTo(19, -27); ctx.fill(); ctx.restore();
+      }
+      if (this.data.decorations.mailbox) {
+        ctx.save(); ctx.translate(122, 212); ctx.strokeStyle = '#88744f'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(0, 13); ctx.lineTo(0, -10); ctx.stroke(); ctx.fillStyle = '#b38372'; ctx.beginPath(); ctx.roundRect(-16, -26, 33, 19, [8, 8, 1, 1]); ctx.fill(); ctx.strokeStyle = '#6d5842'; ctx.lineWidth = 1; ctx.stroke(); ctx.fillStyle = '#e4d9b8'; ctx.fillRect(-11, -21, 14, 9); ctx.strokeStyle = '#b2a382'; ctx.beginPath(); ctx.moveTo(-11, -21); ctx.lineTo(-4, -16); ctx.lineTo(3, -21); ctx.stroke(); ctx.strokeStyle = '#987652'; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.moveTo(10, -28); ctx.lineTo(10, -16); ctx.stroke(); ctx.fillStyle = '#cfaf73'; ctx.fillRect(10, -28, 8, 4); ctx.restore();
       }
       // A permanent little camp lantern makes even a new garden feel lived in.
       const campWarmth = this.reducedMotion ? .12 : .13 + Math.sin(this.sceneTime * 1.8 + .7) * .025;
@@ -463,16 +691,22 @@
     }
 
     render() {
-      if (this.destroyed || !this.ctx || !this.canvas.width) return;
-      const ctx = this.ctx, now = Date.now();
-      ctx.setTransform(this.canvas.width / W, 0, 0, this.canvas.height / H, 0, 0); ctx.clearRect(0, 0, W, H);
-      ctx.fillStyle = '#263c3d'; ctx.fillRect(0, 0, W, H);
+      if (this.destroyed || !this.ctx || !this.canvas.width || !this.viewport) return;
+      const ctx = this.ctx, now = Date.now(), v = this.viewport;
+      ctx.setTransform(v.dpr, 0, 0, v.dpr, 0, 0); ctx.clearRect(0, 0, v.width, v.height);
+      ctx.fillStyle = '#263c3d'; ctx.fillRect(0, 0, v.width, v.height);
+      ctx.setTransform(v.scale * v.dpr, 0, 0, v.scale * v.dpr, v.offsetX * v.dpr, v.offsetY * v.dpr);
+      const viewW = v.width / v.scale, viewH = v.height / v.scale, skyX = -v.offsetX / v.scale, skyY = -v.offsetY / v.scale;
       this.glow(ctx, 93, 118, 145, 'rgba(173,191,163,.035)'); this.glow(ctx, 594, 86, 155, 'rgba(220,196,153,.035)');
-      for (let i = 0; i < 73; i++) { const x = (i * 113.4 + 26) % W, y = (i * 61.8 + 13) % H, alpha = this.reducedMotion ? .45 : .38 + Math.sin(this.sceneTime * .6 + i) * .14; ctx.globalAlpha = alpha; if (i % 15 === 0) this.star(ctx, x, y, 3, '#d8c698'); else this.ellipse(ctx, x, y, i % 4 === 0 ? 1.2 : .6, i % 4 === 0 ? 1.2 : .6, '#e1dfca'); } ctx.globalAlpha = 1;
+      for (let i = 0; i < 73; i++) { const x = skyX + (i * 113.4 + 26) % viewW, y = skyY + (i * 61.8 + 13) % viewH, alpha = this.reducedMotion ? .45 : .38 + Math.sin(this.sceneTime * .6 + i) * .14; ctx.globalAlpha = alpha; if (i % 15 === 0) this.star(ctx, x, y, 3, '#d8c698'); else this.ellipse(ctx, x, y, i % 4 === 0 ? 1.2 : .6, i % 4 === 0 ? 1.2 : .6, '#e1dfca'); } ctx.globalAlpha = 1;
       ctx.save(); ctx.translate(572, 90); ctx.rotate(-.3); this.glow(ctx, 0, 0, 42, 'rgba(240,220,181,.04)'); ctx.fillStyle = '#e5d8b9'; ctx.beginPath(); ctx.arc(0, 0, 15, .45, Math.PI * 1.76); ctx.bezierCurveTo(-6, -15, -10, 9, 13, 6); ctx.fill(); ctx.restore();
       this.terrain(ctx); this.decorations(ctx);
       for (let i = 0; i < 6; i++) this.plotArt(ctx, this.data.plots[i], i, now);
       this.cat(ctx, now);
+      if (!this.reducedMotion && weatherAt(now) === 'rain') {
+        ctx.strokeStyle = 'rgba(195,217,207,.24)'; ctx.lineWidth = 1;
+        for (let i = 0; i < 8; i++) { const x = 127 + i * 61, y = 161 + (this.sceneTime * 18 + i * 23) % 143; ctx.beginPath(); ctx.moveTo(x + 1, y - 4); ctx.lineTo(x, y); ctx.stroke(); }
+      }
       for (const p of this.particles) { ctx.globalAlpha = Math.min(1, p.life * 2); this.star(ctx, p.x, p.y, p.r, p.color); } ctx.globalAlpha = 1;
       // Garden fireflies drift visibly even at the desktop widget's small scale.
       if (!this.reducedMotion) for (let i = 0; i < 6; i++) {
