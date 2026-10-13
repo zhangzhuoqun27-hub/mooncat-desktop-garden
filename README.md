@@ -4,6 +4,12 @@
 
 Mooncat 是 Windows 桌面陪伴程序：小猫可以沿着任务栏上方散步，花园可以安静地待在屏幕边缘。工作时交给月白照料花田，有空时再种花、摸猫、听一点舒缓的音乐。
 
+**[下载 Windows 版 · Mooncat.exe](https://github.com/zhangzhuoqun27-hub/mooncat-desktop-garden/releases/download/v0.1.0/Mooncat.exe)**
+
+[查看 v0.1.0 发行页与校验和](https://github.com/zhangzhuoqun27-hub/mooncat-desktop-garden/releases/tag/v0.1.0)
+
+下载后双击 `Mooncat.exe` 即可运行，无需打开 HTML 或启动浏览器。普通使用者不必下载源代码或自行构建。
+
 ![月白和月亮](app/assets/mooncat-art.png)
 
 ## 可以做什么
