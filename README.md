@@ -30,6 +30,8 @@ Mooncat 是 Windows 桌面陪伴程序：小猫可以沿着任务栏上方散步
 
 ## v0.2.2 花田回报
 
+星光用于买种子、喂猫和购买摆件；花瓣来自收花，只用于购买摆件。摆件同时消耗两种资源，例如月光长椅需要 **18 星光 + 4 花瓣**。托管自动续种会支付种子钱，没有额外托管费。
+
 新播种花的种价与基础花期保持不变，长花期花种的收获提高：
 
 | 花种 | 基础花期 | 种价 | 收获星光 | 净收益 |
@@ -110,6 +112,6 @@ tests/economy.test.cjs       不访问真实存档的经济回归验证
 
 ## 许可
 
-原创程序代码、矢量插画、行走动画与音乐实现采用 [MIT](LICENSE)。猫叫录音采用 CC0；Microsoft WebView2 组件保留 Microsoft 的许可，详见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。项目没有使用《星露谷物语》的代码、角色、素材或音乐。
+原创程序代码、矢量插画、行走动画与音乐实现采用 [MIT](LICENSE)。猫叫录音采用 CC0；Microsoft WebView2 组件保留 Microsoft 的许可，详见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
 
 首个公开版本为 `v0.1.0`；本版未进行代码签名。CI 固定 SDK 和 Actions 版本、公开 SHA256，提供可复现的构建流程；由于编译器和 ZIP 时间戳，独立构建的 EXE 不保证逐字节相同。

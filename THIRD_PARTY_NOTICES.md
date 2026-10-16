@@ -15,7 +15,7 @@ third-party items retain their own licenses.
 
 The source page identifies the recording as CC0, mono, 0.455 seconds. Mooncat
 adds a gentle playback fade and small pitch variations. Attribution is retained
-as a courtesy. No third-party music samples are bundled.
+as a courtesy.
 
 ## Microsoft WebView2 SDK — Microsoft terms
 
