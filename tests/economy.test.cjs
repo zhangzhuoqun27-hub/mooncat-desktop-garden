@@ -45,7 +45,9 @@ function fixture(mutate = () => {}) {
 function stored(game) { return JSON.parse(JSON.stringify(game.data)); }
 function check(name, run) { run(); checks++; console.log(`PASS ${name}`); }
 function readyPlot(type, at = BASE) { return { type, plantedAt: at - 10 * MINUTE, wateredAt: at - 10 * MINUTE, readyAt: at, weather: 'moon', extraWaterAt: 0, blessingEligible: true }; }
-const seedCases = [ ['moon', 2, 3], ['dream', 3, 4], ['peach', 4, 5], ['dew', 4, 6], ['sun', 5, 7], ['lull', 6, 9] ];
+const seedCases = [ ['moon', 2, 3], ['dream', 3, 5], ['peach', 4, 8], ['dew', 4, 12], ['sun', 5, 18], ['lull', 6, 26] ];
+const oldYields = { moon: 3, dream: 4, peach: 5, dew: 6, sun: 7, lull: 9 };
+const seedMinutes = { moon: 8, dream: 15, peach: 25, dew: 45, sun: 70, lull: 100 };
 
 check('fresh save has 12 stars, no decorations and no blessings', () => {
   const env = context(), g = env.game();
@@ -115,9 +117,9 @@ check('100 net-profit threshold deducts floor 20% after credit; callback sees co
   assert.ok(events.every(({ persisted }) => persisted.wallet === 11 && persisted.plots[0] === null && persisted.blessings.count === 1));
   g.tend(0); assert.equal(g.data.blessings.count, 1); assert.equal(g.data.harvested, 1);
 });
-check('three-profit harvest preserves threshold remainder; gifts and migrated flowers do not progress blessings', () => {
+check('twenty-profit harvest preserves threshold remainder; gifts and migrated flowers do not progress blessings', () => {
   const env = context(fixture(d => { d.wallet = 10; d.blessings.progress = 98; d.ledger.blessingNet = 98; d.plots[0] = readyPlot('lull'); })), g = env.game();
-  g.tend(0); assert.equal(g.data.wallet, 16); assert.equal(g.data.blessings.count, 1); assert.equal(g.data.blessings.progress, 1);
+  g.tend(0); assert.equal(g.data.wallet, 29); assert.equal(g.data.blessings.count, 1); assert.equal(g.data.blessings.progress, 18);
   const migrated = context(fixture(d => { d.wallet = 10; d.blessings.progress = 99; d.plots[0] = { ...readyPlot('moon'), blessingEligible: false }; })), mg = migrated.game();
   mg.tend(0); assert.equal(mg.data.wallet, 13); assert.equal(mg.data.blessings.progress, 99); assert.equal(mg.data.blessings.count, 0);
 });
@@ -233,5 +235,124 @@ check('completed blessing callbacks can enter another action without recursive c
   assert.equal(events, 1); assert.equal(g.data.blessings.count, 1); assert.equal(g.data.harvested, 6);
   assert.equal(g.data.wallet, 5); assert.equal(g.data.feedAt, env.now());
   assert.deepEqual(env.persisted(), stored(g));
+});
+check('longer flowers increase gross return, net return and base hourly net efficiency gently', () => {
+  const env = context(), g = env.game();
+  let previousGross = 0, previousNet = 0, previousHourly = 0;
+  for (const [type, cost, reward] of seedCases) {
+    const plot = g.newPlot(type, BASE, true), gross = g.harvestReward(plot).stars;
+    const net = gross - plot.seedCost, hourly = net * 60 / seedMinutes[type];
+    assert.equal(gross, reward); assert.equal(plot.seedCost, cost);
+    assert.ok(gross > previousGross && net > previousNet && hourly > previousHourly);
+    previousGross = gross; previousNet = net; previousHourly = hourly;
+  }
+  assert.equal(previousHourly, 12, 'Longest flower grows to only 12 base net stars per hour per plot.');
+});
+for (const [type, cost, reward] of seedCases) check(`${type}: upgrade preserves planted old return, new planting receives new return`, () => {
+  const initial = fixture(d => { delete d.economy; d.wallet = 50; d.selectedSeed = type; d.plots[0] = readyPlot(type); });
+  const env = context(initial), g = env.game();
+  assert.equal(g.data.version, 2, 'Save stays readable by the previous version.');
+  assert.equal(g.data.wallet, 50); assert.equal(g.data.economy.changedAt, BASE);
+  assert.equal(g.data.plots[0].rewardStars, oldYields[type]);
+  assert.equal(g.data.plots[0].seedCost, cost);
+  g.tend(0); assert.equal(g.data.wallet, 50 + oldYields[type]);
+  assert.equal(g.data.blessings.progress, oldYields[type] - cost);
+  g.tend(0); g.tend(0);
+  assert.equal(g.data.plots[0].rewardStars, reward);
+  const nextReady = g.data.plots[0].readyAt; env.setNow(nextReady); g.tend(0);
+  assert.equal(g.data.wallet, 50 + oldYields[type] - cost + reward);
+  assert.equal(g.data.blessings.progress, oldYields[type] - cost + reward - cost);
+  g.destroy(); env.setNow(nextReady + MINUTE); const reopened = env.game();
+  assert.equal(reopened.data.economy.changedAt, BASE, 'Upgrade boundary never slides forward on reopening.');
+  assert.equal(reopened.data.wallet, 50 + oldYields[type] - cost + reward);
+});
+check('pending old offline cycles use old prices; only planting after first upgraded opening uses new prices', () => {
+  const initial = fixture(d => { delete d.economy; d.autoCare = true; d.wallet = 0; d.selectedSeed = 'dream';
+    d.plots = Array.from({ length: 6 }, () => ({ type: 'dream', plantedAt: BASE, wateredAt: BASE, readyAt: BASE + 15 * MINUTE, weather: 'moon', extraWaterAt: 0, blessingEligible: true })); });
+  const env = context(initial); env.setNow(BASE + 50 * MINUTE); const g = env.game();
+  assert.equal(g.data.harvested, 18); assert.equal(g.data.ledger.grossStarlight, 72);
+  assert.equal(g.data.wallet, 18); assert.equal(g.data.blessings.progress, 18);
+  assert.ok(g.data.plots.every(plot => plot.rewardStars === 4));
+  env.setNow(BASE + 60 * MINUTE); g.backgroundTick();
+  assert.equal(g.data.harvested, 24); assert.equal(g.data.wallet, 24);
+  assert.ok(g.data.plots.every(plot => plot.rewardStars === 5));
+  env.setNow(BASE + 74 * MINUTE); g.backgroundTick();
+  assert.equal(g.data.harvested, 30); assert.equal(g.data.wallet, 36);
+  assert.equal(g.data.ledger.grossStarlight, 126); assert.equal(g.data.blessings.progress, 36);
+  const snapshot = stored(g); delete snapshot.ledger.revision;
+  for (let i = 0; i < 20; i++) {
+    g.destroy(); const reopened = env.game(); reopened.backgroundTick();
+    const actual = stored(reopened); delete actual.ledger.revision;
+    assert.deepEqual(actual, snapshot); reopened.destroy();
+  }
+});
+check('old dry flowers retain their old quote after watering and after reload', () => {
+  const initial = fixture(d => { delete d.economy; d.wallet = 40;
+    d.plots[0] = { type: 'lull', plantedAt: BASE, wateredAt: 0, readyAt: 0, weather: 'moon', extraWaterAt: 0, blessingEligible: true }; });
+  const env = context(initial), g = env.game();
+  g.tend(0); assert.equal(g.data.plots[0].rewardStars, 9);
+  g.destroy(); env.setNow(BASE + 2 * MINUTE); const reopened = env.game();
+  assert.equal(reopened.data.plots[0].rewardStars, 9);
+  env.setNow(reopened.data.plots[0].readyAt); reopened.tend(0);
+  assert.equal(reopened.data.wallet, 49); assert.equal(reopened.data.blessings.progress, 3);
+});
+check('upgrade does not re-credit old harvest ledger, blessings, furniture or a large saved wallet', () => {
+  const initial = fixture(d => { delete d.economy; d.wallet = 1234567; d.petals = 27; d.harvested = 41; d.varieties.lull = 41;
+    d.decorations.bench = true; d.decorations.lantern = true;
+    d.blessings = { count: 2, progress: 38, starsGiven: 43 };
+    d.ledger.grossStarlight = 777; d.ledger.blessingNet = 238; d.ledger.lastHarvestAt = BASE - MINUTE; });
+  const env = context(initial), g = env.game();
+  assert.equal(g.data.wallet, 1234567); assert.equal(g.data.petals, 27); assert.equal(g.data.harvested, 41);
+  assert.deepEqual(stored(g).blessings, initial.blessings);
+  assert.deepEqual(stored(g).decorations, initial.decorations);
+  assert.equal(g.data.ledger.grossStarlight, 777); assert.equal(g.data.ledger.blessingNet, 238);
+  assert.equal(g.data.ledger.lastHarvestAt, BASE - MINUTE);
+  g.data.plots[0] = { ...readyPlot('moon'), ...g.quotePlot('moon', BASE) }; g.save(); g.tend(0);
+  assert.equal(g.data.wallet, 1234570, 'Harvest never lowers an existing wallet to the old one-million cap.');
+});
+check('persisted seed cost and return determine blessing profit independently of the current seed listing', () => {
+  const env = context(fixture(d => { d.wallet = 50; d.plots[0] = { ...readyPlot('lull'), seedCost: 9, rewardStars: 25 }; })), g = env.game();
+  assert.equal(g.harvestReward(g.data.plots[0]).stars, 25);
+  g.tend(0); assert.equal(g.data.wallet, 75); assert.equal(g.data.blessings.progress, 16);
+  assert.equal(g.data.ledger.grossStarlight, 25); assert.equal(g.data.ledger.blessingNet, 16);
+});
+check('six long flowers can cross two blessing milestones without duplicate or lost credit', () => {
+  const env = context(fixture(d => { d.wallet = 0; d.blessings.progress = 95; d.ledger.blessingNet = 95;
+    d.plots = Array.from({ length: 6 }, () => ({ ...readyPlot('lull'), seedCost: 6, rewardStars: 26 })); })), g = env.game();
+  for (let i = 0; i < 6; i++) g.tend(i);
+  assert.equal(g.data.harvested, 6); assert.equal(g.data.ledger.grossStarlight, 156);
+  assert.equal(g.data.ledger.blessingNet, 215); assert.equal(g.data.blessings.count, 2);
+  assert.equal(g.data.blessings.progress, 15); assert.equal(g.data.blessings.starsGiven, 35);
+  assert.equal(g.data.wallet, 121);
+  g.destroy(); const reopened = env.game();
+  assert.equal(reopened.data.wallet, 121); assert.equal(reopened.data.blessings.count, 2);
+});
+check('a full day pending at upgrade pays only historical long-flower quotes and preserves ledger arithmetic', () => {
+  const initial = fixture(d => { delete d.economy; d.autoCare = true; d.wallet = 20000; d.selectedSeed = 'lull';
+    d.plots = Array.from({ length: 6 }, () => ({ type: 'lull', plantedAt: BASE, wateredAt: BASE, readyAt: BASE + 100 * MINUTE, weather: 'moon', extraWaterAt: 0, blessingEligible: true })); });
+  const env = context(initial); env.setNow(BASE + 24 * 60 * MINUTE); const g = env.game();
+  const harvested = g.data.harvested, given = g.data.blessings.starsGiven;
+  assert.ok(harvested > 60); assert.equal(g.data.ledger.grossStarlight, harvested * 9);
+  assert.equal(g.data.ledger.blessingNet, harvested * 3);
+  assert.equal(g.data.blessings.count, Math.floor(harvested * 3 / 100));
+  assert.equal(g.data.blessings.progress, harvested * 3 % 100);
+  assert.equal(g.data.wallet, 20000 + harvested * 3 - given);
+  assert.ok(g.data.plots.every(plot => plot.rewardStars === 9));
+});
+check('two upgraded instances and repeated migration reads share one boundary without replaying old earnings', () => {
+  const initial = fixture(d => { delete d.economy; d.autoCare = true; d.wallet = 0; d.selectedSeed = 'dream';
+    d.plots = Array.from({ length: 6 }, () => ({ type: 'dream', plantedAt: BASE, wateredAt: BASE, readyAt: BASE + 15 * MINUTE, weather: 'moon', extraWaterAt: 0, blessingEligible: true })); });
+  const first = context(initial); first.setNow(BASE + 50 * MINUTE); const a = first.game();
+  const second = context(undefined, first.storage); second.setNow(BASE + 50 * MINUTE); const b = second.game();
+  a.backgroundTick(); b.backgroundTick(); a.syncFromStorage();
+  assert.equal(a.data.wallet, 18); assert.equal(b.data.wallet, 18);
+  assert.equal(a.data.harvested, 18); assert.equal(b.data.harvested, 18);
+  assert.equal(a.data.economy.changedAt, BASE + 50 * MINUTE);
+  assert.equal(b.data.economy.changedAt, BASE + 50 * MINUTE);
+  first.setNow(BASE + 60 * MINUTE); a.backgroundTick();
+  second.setNow(BASE + 60 * MINUTE); b.backgroundTick(); a.syncFromStorage();
+  assert.equal(a.data.wallet, 24); assert.equal(b.data.wallet, 24);
+  assert.equal(a.data.harvested, 24); assert.equal(b.data.harvested, 24);
+  assert.deepEqual(stored(a), stored(b));
 });
 console.log(`ALL ${checks} economic checks passed.`);

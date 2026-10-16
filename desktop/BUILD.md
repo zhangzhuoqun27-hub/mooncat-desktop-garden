@@ -2,7 +2,7 @@
 
 This is a Windows x64 desktop host for the original offline Mooncat garden. The output is one executable with its HTML/CSS/JavaScript, artwork, audio and Microsoft WebView2 SDK redistributables embedded. The executable does not start a web server or open an external browser.
 
-The current source builds **Mooncat v0.2.1** for Windows x64. Download the executable and checksums from the repository's v0.2.1 Release.
+The current source builds **Mooncat v0.2.2** for Windows x64, released on **2026-10-16**. The [v0.2.2 Release](https://github.com/zhangzhuoqun27-hub/mooncat-desktop-garden/releases/tag/v0.2.2) provides the [single executable](https://github.com/zhangzhuoqun27-hub/mooncat-desktop-garden/releases/download/v0.2.2/Mooncat.exe), [Windows ZIP](https://github.com/zhangzhuoqun27-hub/mooncat-desktop-garden/releases/download/v0.2.2/Mooncat-v0.2.2-Windows-x64.zip), and checksums.
 
 ## Build on Windows
 
@@ -35,7 +35,15 @@ The garden uses `widget.html`; the observatory uses `index.html`. Home managemen
 
 Normal updates retain user data. Exit the running program, replace the EXE and launch the new version; it continues using the same profile and offline origin, preserving the garden, wishes and audio preferences. Updating does not automatically reset progress.
 
+In v0.2.2, newly planted flowers retain their seed costs and base growth times, with gross harvest rewards of 3, 5, 8, 12, 18 and 26 stars. Net returns after seed costs are 1, 2, 4, 8, 13 and 20 stars, before any blessing transfer. Existing flowers keep their original harvest quotes, and offline activity before the upgrade is settled at the old rates. See the [flower table in the README](../README.md#v022-花田回报).
+
 ## Isolated verification
+
+Run the 46 economic regression checks using Node.js; this uses only standard libraries and an isolated in-memory save, and requires neither `npm install` nor a native runtime:
+
+```powershell
+node .\tests\economy.test.cjs
+```
 
 These options are intended for development. Always supply an absolute workspace profile so tests do not touch a user's real save:
 

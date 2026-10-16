@@ -18,8 +18,8 @@ using Microsoft.Web.WebView2.WinForms;
 [assembly: AssemblyDescription("A quiet original desktop garden under the stars.")]
 [assembly: AssemblyCompany("Mooncat")]
 [assembly: AssemblyProduct("Mooncat Desktop")]
-[assembly: AssemblyVersion("0.2.1.0")]
-[assembly: AssemblyFileVersion("0.2.1.0")]
+[assembly: AssemblyVersion("0.2.2.0")]
+[assembly: AssemblyFileVersion("0.2.2.0")]
 
 namespace MooncatDesktop {
   internal static class Program {
@@ -193,7 +193,7 @@ namespace MooncatDesktop {
       }
       if(widget.IndexOf("widget.js",StringComparison.Ordinal)<0 || widget.IndexOf("widget.css",StringComparison.Ordinal)<0)throw new InvalidDataException("Compact widget script or stylesheet not linked.");
       StringBuilder log = new StringBuilder();
-      log.AppendLine("PASS Mooncat Desktop 0.2.1 x64");
+      log.AppendLine("PASS Mooncat Desktop 0.2.2 x64");
       log.AppendLine("Embedded archive SHA256: " + archiveHash);
       log.AppendLine("WebView2 SDK: 1.0.4258.31 (official Microsoft NuGet)");
       log.AppendLine("Installed runtime: " + runtime);
@@ -345,7 +345,7 @@ namespace MooncatDesktop {
       if(result.IndexOf("__qaError",StringComparison.Ordinal)>=0){string inner=json.Deserialize<string>(result);var failure=json.Deserialize<Dictionary<string,object>>(inner);throw new InvalidDataException("Native UI QA failed: "+Convert.ToString(failure["__qaError"])+"\r\n"+Convert.ToString(failure["stack"]));}
       if(Program.CaptureAfterQa)await CaptureRuntimePreview(core,Program.CapturePreviewPath);
       await CaptureRuntimePreview(core,Program.CapturePostQaPath);
-      File.WriteAllText(Path.Combine(Program.Profile,"runtime-test.log"),"PASS Mooncat 0.2.1 native state "+mode+"\r\n"+result,Encoding.UTF8);
+      File.WriteAllText(Path.Combine(Program.Profile,"runtime-test.log"),"PASS Mooncat 0.2.2 native state "+mode+"\r\n"+result,Encoding.UTF8);
     }
     private void Navigate(string value){if(view.CoreWebView2==null)return;if(page==value){SendState();return;}page=value;loading.Visible=true;loading.BringToFront();view.CoreWebView2.Navigate("https://mooncat.local/"+value);}
     private void HandleMessage(object sender,CoreWebView2WebMessageReceivedEventArgs e){Uri u;if(!Uri.TryCreate(e.Source,UriKind.Absolute,out u)||u.Scheme!="https"||u.Host!="mooncat.local")return;try{object data=json.DeserializeObject(e.WebMessageAsJson);var map=data as Dictionary<string,object>;string command=map!=null && map.ContainsKey("type")?Convert.ToString(map["type"]):data as string;switch(command){case "ready":SendState();break;case "expand":RequestMode(ViewMode.Expanded);break;case "compact":RequestMode(ViewMode.Garden);break;case "peek":RequestMode(ViewMode.Cat);break;case "hide":case "close":case "minimize":MinimizeToTaskbar();break;case "drag":ReleaseCapture();SendMessage(Handle,0xA1,2,0);break;case "pin":TopMost=!TopMost;if(mode==ViewMode.Garden)widgetPinned=TopMost;else observatoryPinned=TopMost;SaveWindowSettings();SendState();break;case "toggle-fullscreen":if(mode==ViewMode.Expanded)SetFullScreen(!fullscreen);break;case "motion-preference":if(map.ContainsKey("reduced"))reducedMotion=Convert.ToBoolean(map["reduced"]);if(cat!=null)cat.SetReducedMotion(reducedMotion);break;}}catch(Exception ex){Trace("Rejected host payload: "+ex.Message);}}

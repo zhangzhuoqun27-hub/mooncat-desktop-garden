@@ -3,27 +3,30 @@
   'use strict';
   // Keep the storage key stable so the installed v0.1 garden migrates in place.
   const W = 700, H = 440, STORAGE_KEY = 'mooncat.moon-garden.v1', SCHEMA = 2;
-  const MINUTE = 60000, OFFLINE_LIMIT = 24 * 60 * MINUTE;
+  const MINUTE = 60000, OFFLINE_LIMIT = 24 * 60 * MINUTE, ECONOMY_VERSION = 2;
+  // Keep schema 2 readable by older releases. The first upgraded opening fixes
+  // a pricing boundary so its pending offline interval still uses old rates.
+  const OLD_YIELDS = { moon: 3, dream: 4, peach: 5, dew: 6, sun: 7, lull: 9 };
   const WEATHER = { moon: '月夜', breeze: '轻风', rain: '细雨', sun: '晴光' };
   const WEATHER_ORDER = ['moon', 'breeze', 'rain', 'sun'];
   const weatherAt = time => WEATHER_ORDER[Math.floor(time / (30 * MINUTE)) % 4];
   const timeText = ms => ms >= 60 * MINUTE ? `${Math.ceil(ms / MINUTE)} 分钟` : `${Math.max(1, Math.ceil(ms / MINUTE))} 分钟`;
   const SEEDS = {
     moon: { name: '月光花', cost: 2, time: 8 * MINUTE, yield: 3, petals: 1, likes: 'moon', shape: 'daisy', height: 1, petal: '#f2e4c5', center: '#b8974c', leaf: '#6e8b68', detail: '一次浇水就够；月夜里早开一会儿。' },
-    dream: { name: '晚梦铃', cost: 3, time: 15 * MINUTE, yield: 4, petals: 1, likes: 'rain', rainWater: true, mood: 4, shape: 'bell', height: .92, petal: '#c9a5a2', center: '#ddc794', leaf: '#6f8b78', detail: '细雨会帮它浇水；收获时Winesun心情 +4。' },
-    peach: { name: '桃星花', cost: 4, time: 25 * MINUTE, yield: 5, petals: 1, likes: 'breeze', windPetal: true, shape: 'star', height: 1, petal: '#d6b977', center: '#efe0b7', leaf: '#819064', detail: '喜欢轻风；迎风种下，多留一片花瓣。' },
-    dew: { name: '雨露盏', cost: 4, time: 45 * MINUTE, yield: 6, petals: 2, likes: 'rain', rainWater: true, extraWater: true, shape: 'cup', height: 1.08, petal: '#a7c2bd', center: '#e6d6ab', leaf: '#6f8f79', detail: '叶尖藏露珠；补浇一次水，提早 5% 开花。' },
-    sun: { name: '小暖阳', cost: 5, time: 70 * MINUTE, yield: 7, petals: 2, likes: 'sun', shape: 'sun', height: 1.24, petal: '#d9b466', center: '#8b7450', leaf: '#789366', detail: '花盘向光轻轻转；晴光里早开一会儿。' },
-    lull: { name: '月眠兰', cost: 6, time: 100 * MINUTE, yield: 9, petals: 3, likes: 'moon', extraWater: true, shape: 'orchid', height: 1.15, petal: '#ded8b9', center: '#bfa286', leaf: '#688e80', detail: '陪你度过长夜；可补水，开花有小夜蝶。' }
+    dream: { name: '晚梦铃', cost: 3, time: 15 * MINUTE, yield: 5, petals: 1, likes: 'rain', rainWater: true, mood: 4, shape: 'bell', height: .92, petal: '#c9a5a2', center: '#ddc794', leaf: '#6f8b78', detail: '细雨会帮它浇水；收获时Winesun心情 +4。' },
+    peach: { name: '桃星花', cost: 4, time: 25 * MINUTE, yield: 8, petals: 1, likes: 'breeze', windPetal: true, shape: 'star', height: 1, petal: '#d6b977', center: '#efe0b7', leaf: '#819064', detail: '喜欢轻风；迎风种下，多留一片花瓣。' },
+    dew: { name: '雨露盏', cost: 4, time: 45 * MINUTE, yield: 12, petals: 2, likes: 'rain', rainWater: true, extraWater: true, shape: 'cup', height: 1.08, petal: '#a7c2bd', center: '#e6d6ab', leaf: '#6f8f79', detail: '叶尖藏露珠；补浇一次水，提早 5% 开花。' },
+    sun: { name: '小暖阳', cost: 5, time: 70 * MINUTE, yield: 18, petals: 2, likes: 'sun', shape: 'sun', height: 1.24, petal: '#d9b466', center: '#8b7450', leaf: '#789366', detail: '花盘向光轻轻转；晴光里早开一会儿。' },
+    lull: { name: '月眠兰', cost: 6, time: 100 * MINUTE, yield: 26, petals: 3, likes: 'moon', extraWater: true, shape: 'orchid', height: 1.15, petal: '#ded8b9', center: '#bfa286', leaf: '#688e80', detail: '陪你度过长夜；可补水，开花有小夜蝶。' }
   };
   const DECOR = {
-    bench: { name: '月光长椅', price: 18, petals: 4, varieties: 0, detail: '池塘边多一张木长椅。' },
-    lantern: { name: '暖星灯', price: 28, petals: 8, varieties: 0, detail: '栏杆旁有一盏微微摇曳的灯。' },
-    mushroom: { name: '小蘑菇屋', price: 40, petals: 12, varieties: 1, detail: '一座有小圆窗的蘑菇屋。' },
-    windchime: { name: '叶子风铃', price: 36, petals: 10, varieties: 2, detail: '见过 2 种花；风里晃动的小铃。' },
-    birdbath: { name: '小鸟饮水台', price: 48, petals: 14, varieties: 3, detail: '见过 3 种花；一只小鸟来喝水。' },
-    mailbox: { name: '花园信箱', price: 64, petals: 18, varieties: 4, detail: '见过 4 种花；门口有一封小信。' },
-    trellis: { name: '藤叶小拱门', price: 90, petals: 24, varieties: 5, detail: '见过 5 种花；月岛后面长出藤叶。' }
+    bench: { name: '月光长椅', price: 18, petals: 4, varieties: 0, detail: '池塘边的蜂蜜色长椅，放着一只软软的小靠垫。' },
+    lantern: { name: '暖星灯', price: 28, petals: 8, varieties: 0, detail: '高高的星灯点亮岛角；暖光随着灯火轻轻呼吸。' },
+    mushroom: { name: '小蘑菇屋', price: 40, petals: 12, varieties: 1, detail: '赤陶色的蘑菇小屋，圆窗亮着灯，烟囱飘起细烟。' },
+    windchime: { name: '叶子风铃', price: 36, petals: 10, varieties: 2, detail: '见过 2 种花；高木架上的青瓷叶片随风轻摆。' },
+    birdbath: { name: '小鸟饮水台', price: 48, petals: 14, varieties: 3, detail: '见过 3 种花；蓝绿色水台迎来一只会低头喝水的小鸟。' },
+    mailbox: { name: '花园信箱', price: 64, petals: 18, varieties: 4, detail: '见过 4 种花；砖红信箱挂着一封信，小旗在风里摆动。' },
+    trellis: { name: '藤叶小拱门', price: 90, petals: 24, varieties: 5, detail: '见过 5 种花；岛后立起开满小花的藤拱，花瓣缓缓飘下。' }
   };
   const PLOTS = [{ x: 253, y: 222 }, { x: 357, y: 222 }, { x: 461, y: 222 }, { x: 253, y: 294 }, { x: 357, y: 294 }, { x: 461, y: 294 }];
   const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
@@ -83,13 +86,15 @@
 
     load() {
       const now = Date.now();
-      const data = { version: SCHEMA, wallet: 12, happiness: 65, plots: Array(6).fill(null), decorations: Object.fromEntries(Object.keys(DECOR).map(k => [k, false])), giftAt: 0, feedAt: 0, autoCare: this.defaultAutocare, autoAt: now, selectedSeed: 'moon', petals: 0, harvested: 0, varieties: Object.fromEntries(Object.keys(SEEDS).map(k => [k, 0])), blessings: { count: 0, progress: 0, starsGiven: 0 }, ledger: { revision: 0, through: now, harvests: 0, grossStarlight: 0, blessingNet: 0 } };
+      const data = { version: SCHEMA, economy: { version: ECONOMY_VERSION, changedAt: 0 }, wallet: 12, happiness: 65, plots: Array(6).fill(null), decorations: Object.fromEntries(Object.keys(DECOR).map(k => [k, false])), giftAt: 0, feedAt: 0, autoCare: this.defaultAutocare, autoAt: now, selectedSeed: 'moon', petals: 0, harvested: 0, varieties: Object.fromEntries(Object.keys(SEEDS).map(k => [k, 0])), blessings: { count: 0, progress: 0, starsGiven: 0 }, ledger: { revision: 0, through: now, harvests: 0, grossStarlight: 0, blessingNet: 0 } };
       try {
         const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY));
         if (!parsed || typeof parsed !== 'object' || (parsed.version !== 1 && parsed.version !== SCHEMA)) return data;
         const legacy = parsed.version === 1;
-        this.migrated = legacy;
-        data.wallet = Math.floor(clamp(finite(parsed.wallet), 0, 1000000));
+        const oldEconomy = parsed.economy?.version !== ECONOMY_VERSION;
+        this.migrated = legacy || oldEconomy;
+        data.economy.changedAt = oldEconomy ? now : clamp(finite(parsed.economy.changedAt), 0, now);
+        data.wallet = Math.floor(clamp(finite(parsed.wallet), 0, Number.MAX_SAFE_INTEGER));
         data.happiness = Math.round(clamp(finite(parsed.happiness), 0, 100));
         data.giftAt = clamp(finite(parsed.giftAt), 0, now);
         data.feedAt = clamp(finite(parsed.feedAt), 0, now);
@@ -116,7 +121,8 @@
             readyAt = wateredAt + seed.time;
             plantedAt = Math.min(plantedAt, wateredAt);
           } else if (wateredAt) readyAt = clamp(finite(p.readyAt) || readyAt, wateredAt, wateredAt + seed.time);
-          return { type: p.type, plantedAt, wateredAt, readyAt, weather: Object.hasOwn(WEATHER, p.weather) ? p.weather : weatherAt(wateredAt || plantedAt), extraWaterAt: !legacy && p.extraWaterAt ? clamp(finite(p.extraWaterAt), wateredAt || plantedAt, now) : 0, blessingEligible: !legacy && p.blessingEligible !== false };
+          const quote = oldEconomy ? { seedCost: seed.cost, rewardStars: OLD_YIELDS[p.type] } : this.quotePlot(p.type, plantedAt, data.economy.changedAt);
+          return { type: p.type, plantedAt, wateredAt, readyAt, weather: Object.hasOwn(WEATHER, p.weather) ? p.weather : weatherAt(wateredAt || plantedAt), extraWaterAt: !legacy && p.extraWaterAt ? clamp(finite(p.extraWaterAt), wateredAt || plantedAt, now) : 0, blessingEligible: !legacy && p.blessingEligible !== false, seedCost: !oldEconomy && Number.isInteger(p.seedCost) && p.seedCost >= 0 && p.seedCost <= 1000000 ? p.seedCost : quote.seedCost, rewardStars: !oldEconomy && Number.isInteger(p.rewardStars) && p.rewardStars >= 0 && p.rewardStars <= 1000000 ? p.rewardStars : quote.rewardStars };
         });
       } catch (_) { /* A new garden is always available, even without browser storage. */ }
       return data;
@@ -138,11 +144,12 @@
     }
 
     duration(type, at) { return Math.round(SEEDS[type].time * (weatherAt(at) === SEEDS[type].likes ? .9 : 1)); }
-    newPlot(type, at, watered = false) { return { type, plantedAt: at, wateredAt: watered ? at : 0, readyAt: watered ? at + this.duration(type, at) : 0, weather: weatherAt(at), extraWaterAt: 0, blessingEligible: true }; }
+    quotePlot(type, at, changedAt = this.data.economy.changedAt) { return { seedCost: SEEDS[type].cost, rewardStars: changedAt && at < changedAt ? OLD_YIELDS[type] : SEEDS[type].yield }; }
+    newPlot(type, at, watered = false) { return { type, plantedAt: at, wateredAt: watered ? at : 0, readyAt: watered ? at + this.duration(type, at) : 0, weather: weatherAt(at), extraWaterAt: 0, blessingEligible: true, ...this.quotePlot(type, at) }; }
     water(plot, at) { plot.wateredAt = at; plot.readyAt = at + this.duration(plot.type, at); plot.weather = weatherAt(at); }
     plotProgress(plot, now = Date.now()) { return !plot?.wateredAt ? .07 : clamp((now - plot.wateredAt) / Math.max(1, plot.readyAt - plot.wateredAt), .1, 1); }
     varietyCount() { return Object.values(this.data.varieties).filter(n => n > 0).length; }
-    harvestReward(plot) { const seed = SEEDS[plot.type]; return { stars: seed.yield, petals: seed.petals + (seed.windPetal && plot.weather === 'breeze' ? 1 : 0), mood: seed.mood || 2 }; }
+    harvestReward(plot) { const seed = SEEDS[plot.type]; return { stars: plot.rewardStars ?? this.quotePlot(plot.type, plot.plantedAt).rewardStars, petals: seed.petals + (seed.windPetal && plot.weather === 'breeze' ? 1 : 0), mood: seed.mood || 2 }; }
     recordHarvest(plot, at) {
       const reward = this.harvestReward(plot);
       this.data.petals = Math.min(1000000, this.data.petals + reward.petals);
@@ -159,7 +166,7 @@
       // Migrated v1 flowers pay their ordinary harvest once; neither that
       // migration credit, old balances nor cat gifts advance new blessings.
       if (plot.blessingEligible === false) return result;
-      const profit = Math.max(0, reward.stars - SEEDS[plot.type].cost);
+      const profit = Math.max(0, reward.stars - (plot.seedCost ?? this.quotePlot(plot.type, plot.plantedAt).seedCost));
       const blessings = this.data.blessings;
       const total = blessings.progress + profit;
       const milestones = Math.floor(total / 100);
@@ -288,7 +295,7 @@
       } else {
         const seed = SEEDS[plot.type];
         const reward = this.recordHarvest(plot, now);
-        this.data.wallet = Math.min(1000000, this.data.wallet + reward.stars);
+        this.data.wallet = Math.min(Number.MAX_SAFE_INTEGER, this.data.wallet + reward.stars);
         blessingEvent = this.creditBlessings(plot, reward);
         this.data.plots[index] = null;
         this.say(`收获了${seed.name}：${reward.stars} 星光、${reward.petals} 片花瓣。${plot.type === 'dream' ? '小铃轻响，Winesun心情 +4。' : '花园手记又留下了一小页。'}`);
@@ -406,7 +413,7 @@
           const due = Math.max(plot.readyAt, intervalStart);
           if (due > eventAt) continue;
           const reward = this.recordHarvest(plot, eventAt);
-          this.data.wallet = Math.min(1000000, this.data.wallet + reward.stars);
+          this.data.wallet = Math.min(Number.MAX_SAFE_INTEGER, this.data.wallet + reward.stars);
           const blessing = this.creditBlessings(plot, reward);
           blessingBatch.count += blessing.count; blessingBatch.starlight += blessing.starlight;
           const type = this.data.wallet >= SEEDS[this.selectedSeed].cost ? this.selectedSeed : 'moon';
@@ -477,7 +484,7 @@
         const canWater = stage === 'growing' && SEEDS[plot.type].extraWater && !plot.extraWaterAt && now - plot.wateredAt >= MINUTE;
         const label = stage === 'empty' ? '播种' : stage === 'dry' ? '浇水' : stage === 'ready' ? '收获 ✦' : canWater ? '补水' : progress < .3 ? '幼芽' : progress < .75 ? '长叶' : '含苞';
         button.querySelector('span').textContent = label;
-        button.setAttribute('aria-label', `花田 ${i + 1}：${stage === 'empty' ? `空地，点击种下${SEEDS[this.selectedSeed].name}` : stage === 'dry' ? `${SEEDS[plot.type].name}需要浇水，点击浇水` : stage === 'ready' ? `${SEEDS[plot.type].name}开花了，点击收获 ${SEEDS[plot.type].yield} 星光和花瓣` : `${SEEDS[plot.type].name}生长中，约 ${timeText(plot.readyAt - now)}后开花${canWater ? '，可以点击补水，提早一点开花' : ''}`}`);
+        button.setAttribute('aria-label', `花田 ${i + 1}：${stage === 'empty' ? `空地，点击种下${SEEDS[this.selectedSeed].name}` : stage === 'dry' ? `${SEEDS[plot.type].name}需要浇水，点击浇水` : stage === 'ready' ? `${SEEDS[plot.type].name}开花了，点击收获 ${this.harvestReward(plot).stars} 星光和花瓣` : `${SEEDS[plot.type].name}生长中，约 ${timeText(plot.readyAt - now)}后开花${canWater ? '，可以点击补水，提早一点开花' : ''}`}`);
       }
       for (const button of this.decorButtons) {
         const key = button.dataset.decor, owned = this.data.decorations[key];
@@ -641,32 +648,68 @@
     }
 
     decorations(ctx) {
+      // Furniture lives around the rim; every purchase changes the silhouette.
+      // The center stays clear for six flower plots, with no unowned stand-ins.
+      const outline = '#515340', time = this.reducedMotion ? 0 : this.sceneTime;
+      ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
       if (this.data.decorations.trellis) {
-        ctx.save(); ctx.translate(349, 163); ctx.strokeStyle = '#968462'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(-47, 10); ctx.lineTo(-47, -21); ctx.bezierCurveTo(-47, -60, 47, -60, 47, -21); ctx.lineTo(47, 10); ctx.stroke(); ctx.lineWidth = 1; for (let x = -31; x <= 31; x += 16) { ctx.beginPath(); ctx.moveTo(x, -39); ctx.lineTo(x, 8); ctx.stroke(); } for (let y = -28; y <= 0; y += 12) { ctx.beginPath(); ctx.moveTo(-43, y); ctx.lineTo(43, y); ctx.stroke(); } for (let j = 0; j < 10; j++) { const a = Math.PI + j * Math.PI / 9; this.ellipse(ctx, Math.cos(a) * 48, -16 + Math.sin(a) * 35, 6, 3, j % 2 ? '#81976c' : '#93a777'); } ctx.restore();
+        ctx.save(); ctx.translate(350, 178);
+        this.ellipse(ctx, -69, 3, 13, 4, 'rgba(65,78,50,.2)'); this.ellipse(ctx, 69, 3, 13, 4, 'rgba(65,78,50,.2)');
+        const arch = () => { ctx.beginPath(); ctx.moveTo(-69, 1); ctx.lineTo(-69, -43); ctx.bezierCurveTo(-69, -120, 69, -120, 69, -43); ctx.lineTo(69, 1); };
+        ctx.strokeStyle = outline; ctx.lineWidth = 10; arch(); ctx.stroke(); ctx.strokeStyle = '#d1b57d'; ctx.lineWidth = 6; arch(); ctx.stroke();
+        ctx.strokeStyle = '#9b855c'; ctx.lineWidth = 2; for (const side of [-1, 1]) { ctx.beginPath(); ctx.moveTo(side * 59, -4); ctx.lineTo(side * 59, -51); ctx.stroke(); for (let y = -13; y >= -49; y -= 17) { ctx.beginPath(); ctx.moveTo(side * 59, y); ctx.lineTo(side * 74, y - 9); ctx.stroke(); } }
+        ctx.strokeStyle = '#597b58'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(-75, -2); ctx.bezierCurveTo(-52, -32, -88, -58, -48, -86); ctx.bezierCurveTo(-9, -111, 50, -95, 65, -64); ctx.bezierCurveTo(83, -35, 55, -19, 73, -3); ctx.stroke();
+        for (let j = 0; j < 19; j++) { const a = Math.PI + j * Math.PI / 18, sway = Math.sin(time * .8 + j) * 1.2; const x = Math.cos(a) * 71 + sway, y = -39 + Math.sin(a) * 60; ctx.save(); ctx.translate(x, y); ctx.rotate(a + (j % 2 ? .65 : -.65)); this.ellipse(ctx, 0, 0, 10, 5.5, j % 2 ? '#78965b' : '#a8b879'); ctx.restore(); if (j % 3 === 1) { this.ellipse(ctx, x + 3, y + 4, 5.5, 5.5, '#e3b5a3'); this.ellipse(ctx, x + 3, y + 4, 1.8, 1.8, '#f4dfae'); } }
+        for (const side of [-1, 1]) { this.ellipse(ctx, side * 72, -20, 10, 5, '#78965b'); this.ellipse(ctx, side * 66, -7, 9, 5, '#a8b879'); }
+        if (!this.reducedMotion) for (let j = 0; j < 2; j++) { const fall = (time * .065 + j * .5) % 1; this.ellipse(ctx, -43 + j * 77 + Math.sin(fall * 6 + j) * 12, -67 + fall * 47, 2.2, 1.2, `rgba(232,188,173,${Math.sin(fall * Math.PI) * .8})`); }
+        ctx.restore();
       }
       if (this.data.decorations.bench) {
-        ctx.save(); ctx.translate(177, 287); ctx.rotate(.1); ctx.fillStyle = '#8c775a'; ctx.fillRect(-34, -14, 65, 12); ctx.fillStyle = '#bda67b'; ctx.fillRect(-37, -1, 71, 7); ctx.strokeStyle = '#dac9a0'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(-31, -9); ctx.lineTo(29, -9); ctx.stroke(); ctx.strokeStyle = '#6f654b'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(-28, 5); ctx.lineTo(-29, 15); ctx.moveTo(26, 5); ctx.lineTo(25, 15); ctx.stroke(); ctx.restore();
+        ctx.save(); ctx.translate(179, 292); ctx.rotate(.07); this.ellipse(ctx, 0, 15, 42, 7, 'rgba(71,68,43,.22)');
+        ctx.strokeStyle = outline; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(-29, -21); ctx.lineTo(-31, 14); ctx.moveTo(29, -21); ctx.lineTo(31, 14); ctx.stroke();
+        ctx.fillStyle = '#c59b62'; ctx.strokeStyle = outline; ctx.lineWidth = 2; ctx.beginPath(); ctx.roundRect(-36, -28, 72, 23, 3); ctx.fill(); ctx.stroke();
+        ctx.strokeStyle = '#e5c78b'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(-32, -20); ctx.lineTo(32, -20); ctx.moveTo(-32, -13); ctx.lineTo(32, -13); ctx.stroke();
+        ctx.fillStyle = '#d4af73'; ctx.strokeStyle = outline; ctx.lineWidth = 2; ctx.beginPath(); ctx.roundRect(-39, -6, 78, 10, 3); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#bc8f83'; ctx.beginPath(); ctx.roundRect(8, -21, 18, 16, 5); ctx.fill(); ctx.strokeStyle = '#e5c2ae'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(11, -18); ctx.lineTo(23, -8); ctx.moveTo(23, -18); ctx.lineTo(11, -8); ctx.stroke();
+        ctx.strokeStyle = outline; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(-39, -12); ctx.lineTo(-39, -1); ctx.moveTo(39, -12); ctx.lineTo(39, -1); ctx.stroke(); ctx.restore();
       }
       if (this.data.decorations.lantern) {
-        const warmth = this.reducedMotion ? .19 : .19 + Math.sin(this.sceneTime * 2.1) * .032 + Math.sin(this.sceneTime * 6.3) * .008;
-        ctx.save(); ctx.translate(513, 186); this.glow(ctx, 12, -43, 60, `rgba(250,207,135,${warmth})`); ctx.strokeStyle = '#6d6449'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -53); ctx.quadraticCurveTo(1, -60, 12, -57); ctx.stroke(); ctx.fillStyle = '#d3b798'; ctx.fillRect(6, -52, 12, 17); ctx.strokeStyle = '#84704f'; ctx.lineWidth = 1.7; ctx.strokeRect(6, -52, 12, 17); this.ellipse(ctx, 12, -43, 3, 5, '#f6d69d'); this.ellipse(ctx, 0, 1, 7, 2.5, '#84704f'); ctx.restore();
+        const warmth = .27 + Math.sin(time * 1.8) * .035 + Math.sin(time * 5.1) * .01;
+        ctx.save(); ctx.translate(507, 184); this.ellipse(ctx, 3, 1, 12, 4, '#8b815c'); this.ellipse(ctx, 20, -2, 34, 8, 'rgba(244,201,122,.15)');
+        ctx.strokeStyle = outline; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -79); ctx.quadraticCurveTo(1, -92, 20, -88); ctx.stroke(); ctx.strokeStyle = '#ba9c64'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(0, -3); ctx.lineTo(0, -78); ctx.stroke();
+        ctx.save(); ctx.translate(20, -86); ctx.rotate(Math.sin(time * .8) * .035); this.glow(ctx, 0, 20, 66, `rgba(255,210,132,${warmth})`);
+        ctx.strokeStyle = outline; ctx.lineWidth = 2.2; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, 7); ctx.stroke(); ctx.fillStyle = '#d2aa66'; ctx.beginPath(); ctx.moveTo(-15, 12); ctx.lineTo(0, 5); ctx.lineTo(15, 12); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#f0ce8a'; ctx.beginPath(); ctx.roundRect(-12, 12, 24, 26, 3); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#ffebad'; ctx.fillRect(-7, 15, 14, 18); this.star(ctx, 0, 23, 6.5, '#fff3cd'); ctx.strokeStyle = '#a77f45'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-13, 37); ctx.lineTo(13, 37); ctx.stroke(); ctx.restore(); ctx.restore();
       }
       if (this.data.decorations.mushroom) {
-        ctx.save(); ctx.translate(566, 248); this.ellipse(ctx, 0, 16, 28, 8, 'rgba(89,63,91,.18)'); ctx.fillStyle = '#ddcfb0'; ctx.beginPath(); ctx.roundRect(-16, -9, 31, 28, 6); ctx.fill(); ctx.fillStyle = '#b08478'; ctx.beginPath(); ctx.moveTo(-28, -7); ctx.bezierCurveTo(-29, -46, 28, -46, 29, -7); ctx.quadraticCurveTo(0, 2, -28, -7); ctx.fill(); this.ellipse(ctx, -11, -23, 5, 3, '#eadbb8'); this.ellipse(ctx, 12, -18, 6, 3.5, '#eadbb8'); this.ellipse(ctx, 2, -31, 4, 2.5, '#eadbb8'); ctx.fillStyle = '#716047'; ctx.beginPath(); ctx.roundRect(-5, 3, 11, 16, [5, 5, 0, 0]); ctx.fill(); this.ellipse(ctx, 10, 4, 3, 3, '#e6c8a0'); ctx.restore();
+        ctx.save(); ctx.translate(574, 230); this.ellipse(ctx, 0, 21, 36, 8, 'rgba(74,60,48,.2)');
+        ctx.fillStyle = '#ead7ad'; ctx.strokeStyle = outline; ctx.lineWidth = 2.2; ctx.beginPath(); ctx.roundRect(-23, -25, 46, 46, 9); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#a36655'; ctx.beginPath(); ctx.roundRect(16, -57, 10, 23, 2); ctx.fill(); ctx.stroke();
+        if (!this.reducedMotion) for (let j = 0; j < 3; j++) { const rise = (time * .19 + j / 3) % 1; this.ellipse(ctx, 21 + Math.sin(rise * 4 + j) * 6, -62 - rise * 23, 2.5 + rise * 3, 2 + rise * 2, `rgba(231,219,199,${(1 - rise) * .35})`); }
+        ctx.fillStyle = '#b96f5b'; ctx.beginPath(); ctx.moveTo(-37, -21); ctx.bezierCurveTo(-37, -76, 35, -76, 38, -21); ctx.quadraticCurveTo(0, -8, -37, -21); ctx.closePath(); ctx.fill(); ctx.stroke();
+        this.ellipse(ctx, -16, -42, 7.5, 5.5, '#f1dfb9'); this.ellipse(ctx, 13, -36, 8.5, 6, '#f1dfb9'); this.ellipse(ctx, 0, -55, 5.5, 4, '#f1dfb9');
+        ctx.fillStyle = '#775743'; ctx.beginPath(); ctx.roundRect(-7, 1, 15, 20, [7, 7, 0, 0]); ctx.fill(); this.ellipse(ctx, 3, 12, 1.2, 1.2, '#d7bc79');
+        this.glow(ctx, 15, -6, 18, 'rgba(247,198,115,.17)'); this.ellipse(ctx, 15, -6, 6.5, 6.5, '#f1c779'); ctx.strokeStyle = '#815e44'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(15, -6, 6.5, 0, Math.PI * 2); ctx.moveTo(9, -6); ctx.lineTo(21, -6); ctx.moveTo(15, -12); ctx.lineTo(15, 0); ctx.stroke();
+        this.ellipse(ctx, -18, 22, 8, 2.5, '#d5c6a0'); this.ellipse(ctx, -10, 24, 7, 2, '#d5c6a0'); ctx.restore();
       }
       if (this.data.decorations.windchime) {
-        const sway = this.reducedMotion ? 0 : Math.sin(this.sceneTime * .9) * 3;
-        ctx.save(); ctx.translate(204, 185); ctx.strokeStyle = '#8a795a'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-11, 0); ctx.lineTo(-11, -42); ctx.lineTo(17, -42); ctx.stroke(); ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(0, -41); ctx.lineTo(sway, -18); ctx.moveTo(11, -41); ctx.lineTo(11 + sway, -11); ctx.stroke(); this.ellipse(ctx, sway, -16, 4, 5, '#c6b78b'); this.ellipse(ctx, 11 + sway, -9, 3.5, 5, '#9bb092'); ctx.restore();
+        ctx.save(); ctx.translate(202, 185); this.ellipse(ctx, -12, 0, 10, 3, 'rgba(68,77,47,.2)'); ctx.strokeStyle = outline; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(-13, 0); ctx.lineTo(-13, -76); ctx.quadraticCurveTo(-12, -82, -5, -82); ctx.lineTo(24, -82); ctx.stroke(); ctx.strokeStyle = '#c2a979'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-13, -4); ctx.lineTo(-13, -76); ctx.lineTo(23, -76); ctx.stroke();
+        for (let j = 0; j < 3; j++) { const sway = Math.sin(time * 1.1 + j * .45) * .13; ctx.save(); ctx.translate(-1 + j * 11, -77); ctx.rotate(sway); const length = [27, 43, 32][j]; ctx.strokeStyle = '#e1d2b2'; ctx.lineWidth = 1.1; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, length); ctx.stroke(); ctx.fillStyle = ['#e2c782', '#98b9a6', '#b7cab9'][j]; ctx.strokeStyle = '#5d7c68'; ctx.lineWidth = 1.3; ctx.beginPath(); ctx.moveTo(0, length - 2); ctx.quadraticCurveTo(-15, length + 6, -2, length + 19); ctx.quadraticCurveTo(12, length + 9, 0, length - 2); ctx.fill(); ctx.stroke(); ctx.beginPath(); ctx.moveTo(0, length + 3); ctx.lineTo(-1, length + 14); ctx.stroke(); ctx.restore(); }
+        ctx.restore();
       }
       if (this.data.decorations.birdbath) {
-        ctx.save(); ctx.translate(140, 300); ctx.strokeStyle = '#8a8c74'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -16); ctx.stroke(); this.ellipse(ctx, 0, 1, 11, 3, '#a0a58b'); this.ellipse(ctx, 0, -17, 18, 6, '#a7b2a0'); this.ellipse(ctx, 0, -19, 14, 3, '#83a39b'); this.ellipse(ctx, 11, -27, 7, 5, '#d6bf8d'); this.ellipse(ctx, 16, -30, 3.6, 3.7, '#dfcda5'); this.ellipse(ctx, 7, -27, 3.7, 2.6, '#b49472'); this.ellipse(ctx, 17, -30, .65, .65, '#4a4a37'); ctx.fillStyle = '#99754d'; ctx.beginPath(); ctx.moveTo(19, -29); ctx.lineTo(23, -28); ctx.lineTo(19, -27); ctx.fill(); ctx.restore();
+        ctx.save(); ctx.translate(115, 279); this.ellipse(ctx, 0, 1, 19, 5, 'rgba(68,77,47,.2)'); ctx.fillStyle = '#91aaa0'; ctx.strokeStyle = outline; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-7, -31); ctx.lineTo(-5, -7); ctx.lineTo(-14, -2); ctx.quadraticCurveTo(0, 4, 14, -2); ctx.lineTo(5, -7); ctx.lineTo(7, -31); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#a7c1b4'; ctx.beginPath(); ctx.moveTo(-24, -36); ctx.quadraticCurveTo(-21, -20, 0, -20); ctx.quadraticCurveTo(21, -20, 24, -36); ctx.fill(); ctx.stroke(); this.ellipse(ctx, 0, -36, 24, 7, '#c2d0b9'); this.ellipse(ctx, 0, -37, 19, 4.5, '#6f9e9a');
+        ctx.strokeStyle = '#d7e5d0'; ctx.lineWidth = 1; const ripple = (time * .6) % 1; ctx.globalAlpha = .7 - ripple * .5; ctx.beginPath(); ctx.ellipse(-4, -37, 4 + ripple * 9, 1.5 + ripple * 1.3, 0, 0, Math.PI * 2); ctx.stroke(); ctx.globalAlpha = 1;
+        const drink = this.reducedMotion ? 0 : Math.pow(Math.max(0, Math.sin(time * .8)), 8); ctx.save(); ctx.translate(12, -43); ctx.rotate(-drink * .5); this.ellipse(ctx, 0, -5, 10, 7, '#d6af69'); ctx.fillStyle = '#a17d56'; ctx.beginPath(); ctx.moveTo(8, -6); ctx.lineTo(19, -13); ctx.lineTo(14, -3); ctx.closePath(); ctx.fill(); this.ellipse(ctx, 1, -5, 5, 4, '#af875b'); this.ellipse(ctx, -6, -11, 5.5, 5.5, '#ecd4a0'); this.ellipse(ctx, -7, -12, 1.1, 1.1, '#454a39'); ctx.fillStyle = '#aa7644'; ctx.beginPath(); ctx.moveTo(-11, -9); ctx.lineTo(-17, -7); ctx.lineTo(-10, -6); ctx.closePath(); ctx.fill(); ctx.restore(); ctx.restore();
       }
       if (this.data.decorations.mailbox) {
-        ctx.save(); ctx.translate(122, 212); ctx.strokeStyle = '#88744f'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(0, 13); ctx.lineTo(0, -10); ctx.stroke(); ctx.fillStyle = '#b38372'; ctx.beginPath(); ctx.roundRect(-16, -26, 33, 19, [8, 8, 1, 1]); ctx.fill(); ctx.strokeStyle = '#6d5842'; ctx.lineWidth = 1; ctx.stroke(); ctx.fillStyle = '#e4d9b8'; ctx.fillRect(-11, -21, 14, 9); ctx.strokeStyle = '#b2a382'; ctx.beginPath(); ctx.moveTo(-11, -21); ctx.lineTo(-4, -16); ctx.lineTo(3, -21); ctx.stroke(); ctx.strokeStyle = '#987652'; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.moveTo(10, -28); ctx.lineTo(10, -16); ctx.stroke(); ctx.fillStyle = '#cfaf73'; ctx.fillRect(10, -28, 8, 4); ctx.restore();
+        ctx.save(); ctx.translate(124, 212); this.ellipse(ctx, 0, 0, 13, 4, 'rgba(68,77,47,.2)'); ctx.strokeStyle = outline; ctx.lineWidth = 7; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -29); ctx.stroke(); ctx.strokeStyle = '#b29262'; ctx.lineWidth = 3.5; ctx.beginPath(); ctx.moveTo(0, -3); ctx.lineTo(0, -27); ctx.stroke();
+        ctx.fillStyle = '#bd7c67'; ctx.strokeStyle = outline; ctx.lineWidth = 2; ctx.beginPath(); ctx.roundRect(-23, -51, 46, 30, [13, 13, 3, 3]); ctx.fill(); ctx.stroke(); ctx.strokeStyle = '#e5b296'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(-18, -29); ctx.lineTo(17, -29); ctx.stroke();
+        ctx.save(); ctx.translate(-10, -42); ctx.rotate(-.12); ctx.fillStyle = '#f3e4bf'; ctx.strokeStyle = '#8b775c'; ctx.lineWidth = 1.1; ctx.beginPath(); ctx.roundRect(0, 0, 22, 15, 1.5); ctx.fill(); ctx.stroke(); ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(11, 8); ctx.lineTo(22, 0); ctx.stroke(); ctx.restore();
+        ctx.strokeStyle = '#77583f'; ctx.lineWidth = 2.2; ctx.beginPath(); ctx.moveTo(17, -42); ctx.lineTo(17, -62); ctx.stroke(); const wave = Math.sin(time * 1.2) * 1.5; ctx.fillStyle = '#e2ba68'; ctx.beginPath(); ctx.moveTo(17, -62); ctx.quadraticCurveTo(24, -65 + wave, 31, -61); ctx.lineTo(30, -51); ctx.quadraticCurveTo(23, -55 + wave, 17, -52); ctx.closePath(); ctx.fill(); ctx.restore();
       }
-      // A permanent little camp lantern makes even a new garden feel lived in.
-      const campWarmth = this.reducedMotion ? .12 : .13 + Math.sin(this.sceneTime * 1.8 + .7) * .025;
-      this.glow(ctx, 184, 180, 27, `rgba(238,200,146,${campWarmth})`); ctx.fillStyle = '#887958'; ctx.fillRect(177, 170, 13, 17); ctx.fillStyle = '#d8bb7a'; ctx.fillRect(180, 173, 7, 11); ctx.strokeStyle = '#887958'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(184, 169, 4, Math.PI, 0); ctx.stroke();
+      ctx.restore();
     }
 
     cat(ctx, now) {

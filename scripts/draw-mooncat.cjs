@@ -57,14 +57,14 @@ function leg(limb, phase, bob) {
   const footx=number(limb.hip+swing), sole=number(230-lift);
   const hipY=number(194+bob), kneeX=number(limb.hip+swing*.34+(limb.hind?3:-2));
   const kneeY=number(216-lift*.48), tint=limb.near?cream:'#e9e0cc';
-  // The torso covers these generous rounded hip caps. Only a short bent calf
-  // and a little oval paw show below the belly; no detached rectangular limbs.
+  // Hip caps remain hidden inside the slimmer torso. A soft calf joins each
+  // little paw continuously; shortening the head never changes planted feet.
   return `<g data-limb="${limb.name}" data-anatomy="${limb.label}" data-phase="${limb.offset===0?'0':'PI'}" data-stance="${stance}" data-sole="${sole}">
-    <path d="M${limb.hip-9} ${hipY} Q${kneeX-10} ${kneeY-4} ${footx-6} ${sole-8}
-      C${footx-12} ${sole-6} ${footx-12} ${sole} ${footx-4} ${sole}
-      L${footx+9} ${sole} Q${footx+16} ${sole} ${footx+13} ${sole-5}
-      Q${footx+11} ${sole-9} ${footx+4} ${sole-9}
-      Q${kneeX+8} ${kneeY-2} ${limb.hip+9} ${hipY}Z" fill="${tint}" stroke="${ink}" stroke-width="2.35"/>
+    <path d="M${limb.hip-7} ${hipY} Q${kneeX-7} ${kneeY-4} ${footx-5} ${sole-8}
+      C${footx-10} ${sole-6} ${footx-10} ${sole} ${footx-3} ${sole}
+      L${footx+8} ${sole} Q${footx+14} ${sole} ${footx+11} ${sole-5}
+      Q${footx+9} ${sole-9} ${footx+3} ${sole-9}
+      Q${kneeX+6} ${kneeY-2} ${limb.hip+7} ${hipY}Z" fill="${tint}" stroke="${ink}" stroke-width="2.2"/>
     ${limb.near?`<path d="M${footx+2} ${sole-4} L${footx+2} ${sole-1.5} M${footx+8} ${sole-4} L${footx+8} ${sole-1.5}" fill="none" stroke="${ink}" stroke-width="1.35"/>`:''}
   </g>`;
 }
@@ -74,14 +74,14 @@ function walker(i) {
   return `<g transform="translate(${(i%4)*256} ${Math.floor(i/4)*256})" stroke-linecap="round" stroke-linejoin="round" data-frame="${i}">
   ${limbs.map(limb=>leg(limb,phase,bob)).join('')}
   <g transform="translate(0 ${number(bob)})">
-    <path d="M83 181 C57 181 47 163 50 ${151+tail} C53 ${137+tail} 64 ${135+tail} 69 ${145+tail}" fill="none" stroke="${ink}" stroke-width="19"/>
-    <path d="M83 181 C57 181 47 163 50 ${151+tail} C53 ${137+tail} 64 ${135+tail} 69 ${145+tail}" fill="none" stroke="${cream}" stroke-width="14"/>
-    <path d="M83 173 C96 156 124 153 146 160 C161 157 180 165 188 180
-      C198 195 189 207 174 210 Q151 216 122 211
-      Q98 216 81 207 C69 199 70 183 83 173Z" fill="${cream}" stroke="${ink}" stroke-width="2.6"/>
-    <path d="M100 190 C108 178 131 178 146 187 Q165 197 159 208 Q134 215 110 207Z" fill="#eedfc5" opacity=".82"/>
-    <path d="M85 177 Q90 173 96 173 M80 188 Q79 193 81 196" fill="none" stroke="#b8a78b" stroke-width="1.3" opacity=".72"/>
-    <g transform="rotate(${number(headTilt)} 173 166)">
+    <path d="M83 181 C57 181 47 163 50 ${151+tail} C53 ${137+tail} 64 ${135+tail} 69 ${145+tail}" fill="none" stroke="${ink}" stroke-width="16"/>
+    <path d="M83 181 C57 181 47 163 50 ${151+tail} C53 ${137+tail} 64 ${135+tail} 69 ${145+tail}" fill="none" stroke="${cream}" stroke-width="11.5"/>
+    <path d="M83 179 C96 165 121 161 144 167 C159 163 178 169 186 182
+      C194 193 188 203 173 206 Q151 210 126 206
+      Q103 213 84 205 C72 200 72 188 83 179Z" fill="${cream}" stroke="${ink}" stroke-width="2.45"/>
+    <path d="M102 192 C111 182 130 181 145 188 Q159 195 154 203 Q132 209 112 202Z" fill="#eedfc5" opacity=".72"/>
+    <path d="M86 181 Q91 177 97 177 M81 191 Q80 195 83 198" fill="none" stroke="#b8a78b" stroke-width="1.25" opacity=".65"/>
+    <g transform="rotate(${number(headTilt)} 181 173) translate(181 178) scale(.88) translate(-181 -178)">
       <path d="M139 116 Q139 107 143 94 Q146 86 152 94 L163 108
         Q177 102 191 107 L207 94 Q214 90 214 100 L213 116
         C226 127 232 144 225 159 C219 175 202 185 183 185

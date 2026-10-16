@@ -1,42 +1,42 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 512" width="1024" height="512"><g transform="translate(0 0)" stroke-linecap="round" stroke-linejoin="round" data-frame="0">
   <g data-limb="RH" data-anatomy="right hind / far hind" data-phase="0" data-stance="true" data-sole="230">
-    <path d="M91 194 Q97.42 212 107 222
-      C101 224 101 230 109 230
-      L122 230 Q129 230 126 225
-      Q124 221 117 221
-      Q115.42 214 109 194Z" fill="#e9e0cc" stroke="#44382f" stroke-width="2.35"/>
+    <path d="M93 194 Q100.42 212 108 222
+      C103 224 103 230 110 230
+      L121 230 Q127 230 124 225
+      Q122 221 116 221
+      Q113.42 214 107 194Z" fill="#e9e0cc" stroke="#44382f" stroke-width="2.2"/>
     
   </g><g data-limb="RF" data-anatomy="right fore / far front" data-phase="PI" data-stance="true" data-sole="230">
-    <path d="M163 194 Q157.05 212 157.33 222
-      C151.33 224 151.33 230 159.33 230
-      L172.33 230 Q179.33 230 176.33 225
-      Q174.33 221 167.33 221
-      Q175.05 214 181 194Z" fill="#e9e0cc" stroke="#44382f" stroke-width="2.35"/>
+    <path d="M165 194 Q160.05 212 158.33 222
+      C153.33 224 153.33 230 160.33 230
+      L171.33 230 Q177.33 230 174.33 225
+      Q172.33 221 166.33 221
+      Q173.05 214 179 194Z" fill="#e9e0cc" stroke="#44382f" stroke-width="2.2"/>
     
   </g><g data-limb="LH" data-anatomy="left hind / near hind" data-phase="PI" data-stance="true" data-sole="230">
-    <path d="M79 194 Q78.05 212 73.33 222
-      C67.33 224 67.33 230 75.33 230
-      L88.33 230 Q95.33 230 92.33 225
-      Q90.33 221 83.33 221
-      Q96.05 214 97 194Z" fill="#f6efdc" stroke="#44382f" stroke-width="2.35"/>
+    <path d="M81 194 Q81.05 212 74.33 222
+      C69.33 224 69.33 230 76.33 230
+      L87.33 230 Q93.33 230 90.33 225
+      Q88.33 221 82.33 221
+      Q94.05 214 95 194Z" fill="#f6efdc" stroke="#44382f" stroke-width="2.2"/>
     <path d="M81.33 226 L81.33 228.5 M87.33 226 L87.33 228.5" fill="none" stroke="#44382f" stroke-width="1.35"/>
   </g><g data-limb="LF" data-anatomy="left fore / near front" data-phase="0" data-stance="true" data-sole="230">
-    <path d="M176 194 Q177.42 212 192 222
-      C186 224 186 230 194 230
-      L207 230 Q214 230 211 225
-      Q209 221 202 221
-      Q195.42 214 194 194Z" fill="#f6efdc" stroke="#44382f" stroke-width="2.35"/>
+    <path d="M178 194 Q180.42 212 193 222
+      C188 224 188 230 195 230
+      L206 230 Q212 230 209 225
+      Q207 221 201 221
+      Q193.42 214 192 194Z" fill="#f6efdc" stroke="#44382f" stroke-width="2.2"/>
     <path d="M200 226 L200 228.5 M206 226 L206 228.5" fill="none" stroke="#44382f" stroke-width="1.35"/>
   </g>
   <g transform="translate(0 0)">
-    <path d="M83 181 C57 181 47 163 50 148.59583694396574 C53 134.59583694396574 64 132.59583694396574 69 142.59583694396574" fill="none" stroke="#44382f" stroke-width="19"/>
-    <path d="M83 181 C57 181 47 163 50 148.59583694396574 C53 134.59583694396574 64 132.59583694396574 69 142.59583694396574" fill="none" stroke="#f6efdc" stroke-width="14"/>
-    <path d="M83 173 C96 156 124 153 146 160 C161 157 180 165 188 180
-      C198 195 189 207 174 210 Q151 216 122 211
-      Q98 216 81 207 C69 199 70 183 83 173Z" fill="#f6efdc" stroke="#44382f" stroke-width="2.6"/>
-    <path d="M100 190 C108 178 131 178 146 187 Q165 197 159 208 Q134 215 110 207Z" fill="#eedfc5" opacity=".82"/>
-    <path d="M85 177 Q90 173 96 173 M80 188 Q79 193 81 196" fill="none" stroke="#b8a78b" stroke-width="1.3" opacity=".72"/>
-    <g transform="rotate(0 173 166)">
+    <path d="M83 181 C57 181 47 163 50 148.59583694396574 C53 134.59583694396574 64 132.59583694396574 69 142.59583694396574" fill="none" stroke="#44382f" stroke-width="16"/>
+    <path d="M83 181 C57 181 47 163 50 148.59583694396574 C53 134.59583694396574 64 132.59583694396574 69 142.59583694396574" fill="none" stroke="#f6efdc" stroke-width="11.5"/>
+    <path d="M83 179 C96 165 121 161 144 167 C159 163 178 169 186 182
+      C194 193 188 203 173 206 Q151 210 126 206
+      Q103 213 84 205 C72 200 72 188 83 179Z" fill="#f6efdc" stroke="#44382f" stroke-width="2.45"/>
+    <path d="M102 192 C111 182 130 181 145 188 Q159 195 154 203 Q132 209 112 202Z" fill="#eedfc5" opacity=".72"/>
+    <path d="M86 181 Q91 177 97 177 M81 191 Q80 195 83 198" fill="none" stroke="#b8a78b" stroke-width="1.25" opacity=".65"/>
+    <g transform="rotate(0 181 173) translate(181 178) scale(.88) translate(-181 -178)">
       <path d="M139 116 Q139 107 143 94 Q146 86 152 94 L163 108
         Q177 102 191 107 L207 94 Q214 90 214 100 L213 116
         C226 127 232 144 225 159 C219 175 202 185 183 185
@@ -59,43 +59,43 @@
     <path d="M121 192 L123 195" stroke="#f6efdc" stroke-width="1.25"/>
   </g></g><g transform="translate(256 0)" stroke-linecap="round" stroke-linejoin="round" data-frame="1">
   <g data-limb="RH" data-anatomy="right hind / far hind" data-phase="0" data-stance="true" data-sole="230">
-    <path d="M91 194.6 Q95.58 212 101.58 222
-      C95.58 224 95.58 230 103.58 230
-      L116.58 230 Q123.58 230 120.58 225
-      Q118.58 221 111.58 221
-      Q113.58 214 109 194.6Z" fill="#e9e0cc" stroke="#44382f" stroke-width="2.35"/>
+    <path d="M93 194.6 Q98.58 212 102.58 222
+      C97.58 224 97.58 230 104.58 230
+      L115.58 230 Q121.58 230 118.58 225
+      Q116.58 221 110.58 221
+      Q111.58 214 107 194.6Z" fill="#e9e0cc" stroke="#44382f" stroke-width="2.2"/>
     
   </g><g data-limb="RF" data-anatomy="right fore / far front" data-phase="PI" data-stance="false" data-sole="227.66">
-    <path d="M163 194.6 Q155.66 210.88 153.25 219.66
-      C147.25 221.66 147.25 227.66 155.25 227.66
-      L168.25 227.66 Q175.25 227.66 172.25 222.66
-      Q170.25 218.66 163.25 218.66
-      Q173.66 212.88 181 194.6Z" fill="#e9e0cc" stroke="#44382f" stroke-width="2.35"/>
+    <path d="M165 194.6 Q158.66 210.88 154.25 219.66
+      C149.25 221.66 149.25 227.66 156.25 227.66
+      L167.25 227.66 Q173.25 227.66 170.25 222.66
+      Q168.25 218.66 162.25 218.66
+      Q171.66 212.88 179 194.6Z" fill="#e9e0cc" stroke="#44382f" stroke-width="2.2"/>
     
   </g><g data-limb="LH" data-anatomy="left hind / near hind" data-phase="PI" data-stance="false" data-sole="227.66">
-    <path d="M79 194.6 Q76.66 210.88 69.25 219.66
-      C63.25 221.66 63.25 227.66 71.25 227.66
-      L84.25 227.66 Q91.25 227.66 88.25 222.66
-      Q86.25 218.66 79.25 218.66
-      Q94.66 212.88 97 194.6Z" fill="#f6efdc" stroke="#44382f" stroke-width="2.35"/>
+    <path d="M81 194.6 Q79.66 210.88 70.25 219.66
+      C65.25 221.66 65.25 227.66 72.25 227.66
+      L83.25 227.66 Q89.25 227.66 86.25 222.66
+      Q84.25 218.66 78.25 218.66
+      Q92.66 212.88 95 194.6Z" fill="#f6efdc" stroke="#44382f" stroke-width="2.2"/>
     <path d="M77.25 223.66 L77.25 226.16 M83.25 223.66 L83.25 226.16" fill="none" stroke="#44382f" stroke-width="1.35"/>
   </g><g data-limb="LF" data-anatomy="left fore / near front" data-phase="0" data-stance="true" data-sole="230">
-    <path d="M176 194.6 Q175.58 212 186.58 222
-      C180.58 224 180.58 230 188.58 230
-      L201.58 230 Q208.58 230 205.58 225
-      Q203.58 221 196.58 221
-      Q193.58 214 194 194.6Z" fill="#f6efdc" stroke="#44382f" stroke-width="2.35"/>
+    <path d="M178 194.6 Q178.58 212 187.58 222
+      C182.58 224 182.58 230 189.58 230
+      L200.58 230 Q206.58 230 203.58 225
+      Q201.58 221 195.58 221
+      Q191.58 214 192 194.6Z" fill="#f6efdc" stroke="#44382f" stroke-width="2.2"/>
     <path d="M194.58 226 L194.58 228.5 M200.58 226 L200.58 228.5" fill="none" stroke="#44382f" stroke-width="1.35"/>
   </g>
   <g transform="translate(0 0.6)">
-    <path d="M83 181 C57 181 47 163 50 151 C53 137 64 135 69 145" fill="none" stroke="#44382f" stroke-width="19"/>
-    <path d="M83 181 C57 181 47 163 50 151 C53 137 64 135 69 145" fill="none" stroke="#f6efdc" stroke-width="14"/>
-    <path d="M83 173 C96 156 124 153 146 160 C161 157 180 165 188 180
-      C198 195 189 207 174 210 Q151 216 122 211
-      Q98 216 81 207 C69 199 70 183 83 173Z" fill="#f6efdc" stroke="#44382f" stroke-width="2.6"/>
-    <path d="M100 190 C108 178 131 178 146 187 Q165 197 159 208 Q134 215 110 207Z" fill="#eedfc5" opacity=".82"/>
-    <path d="M85 177 Q90 173 96 173 M80 188 Q79 193 81 196" fill="none" stroke="#b8a78b" stroke-width="1.3" opacity=".72"/>
-    <g transform="rotate(0.32 173 166)">
+    <path d="M83 181 C57 181 47 163 50 151 C53 137 64 135 69 145" fill="none" stroke="#44382f" stroke-width="16"/>
+    <path d="M83 181 C57 181 47 163 50 151 C53 137 64 135 69 145" fill="none" stroke="#f6efdc" stroke-width="11.5"/>
+    <path d="M83 179 C96 165 121 161 144 167 C159 163 178 169 186 182
+      C194 193 188 203 173 206 Q151 210 126 206
+      Q103 213 84 205 C72 200 72 188 83 179Z" fill="#f6efdc" stroke="#44382f" stroke-width="2.45"/>
+    <path d="M102 192 C111 182 130 181 145 188 Q159 195 154 203 Q132 209 112 202Z" fill="#eedfc5" opacity=".72"/>
+    <path d="M86 181 Q91 177 97 177 M81 191 Q80 195 83 198" fill="none" stroke="#b8a78b" stroke-width="1.25" opacity=".65"/>
+    <g transform="rotate(0.32 181 173) translate(181 178) scale(.88) translate(-181 -178)">
       <path d="M139 116 Q139 107 143 94 Q146 86 152 94 L163 108
         Q177 102 191 107 L207 94 Q214 90 214 100 L213 116
         C226 127 232 144 225 159 C219 175 202 185 183 185
@@ -118,43 +118,43 @@
     <path d="M121 192 L123 195" stroke="#f6efdc" stroke-width="1.25"/>
   </g></g><g transform="translate(512 0)" stroke-linecap="round" stroke-linejoin="round" data-frame="2">
   <g data-limb="RH" data-anatomy="right hind / far hind" data-phase="0" data-stance="true" data-sole="230">
-    <path d="M91 194 Q93.74 212 96.17 222
-      C90.17 224 90.17 230 98.17 230
-      L111.17 230 Q118.17 230 115.17 225
-      Q113.17 221 106.17 221
-      Q111.74 214 109 194Z" fill="#e9e0cc" stroke="#44382f" stroke-width="2.35"/>
+    <path d="M93 194 Q96.74 212 97.17 222
+      C92.17 224 92.17 230 99.17 230
+      L110.17 230 Q116.17 230 113.17 225
+      Q111.17 221 105.17 221
+      Q109.74 214 107 194Z" fill="#e9e0cc" stroke="#44382f" stroke-width="2.2"/>
     
   </g><g data-limb="RF" data-anatomy="right fore / far front" data-phase="PI" data-stance="false" data-sole="218.91">
-    <path d="M163 194 Q158.31 206.68 161.03 210.91
-      C155.03 212.91 155.03 218.91 163.03 218.91
-      L176.03 218.91 Q183.03 218.91 180.03 213.91
-      Q178.03 209.91 171.03 209.91
-      Q176.31 208.68 181 194Z" fill="#e9e0cc" stroke="#44382f" stroke-width="2.35"/>
+    <path d="M165 194 Q161.31 206.68 162.03 210.91
+      C157.03 212.91 157.03 218.91 164.03 218.91
+      L175.03 218.91 Q181.03 218.91 178.03 213.91
+      Q176.03 209.91 170.03 209.91
+      Q174.31 208.68 179 194Z" fill="#e9e0cc" stroke="#44382f" stroke-width="2.2"/>
     
   </g><g data-limb="LH" data-anatomy="left hind / near hind" data-phase="PI" data-stance="false" data-sole="218.91">
-    <path d="M79 194 Q79.31 206.68 77.03 210.91
-      C71.03 212.91 71.03 218.91 79.03 218.91
-      L92.03 218.91 Q99.03 218.91 96.03 213.91
-      Q94.03 209.91 87.03 209.91
-      Q97.31 208.68 97 194Z" fill="#f6efdc" stroke="#44382f" stroke-width="2.35"/>
+    <path d="M81 194 Q82.31 206.68 78.03 210.91
+      C73.03 212.91 73.03 218.91 80.03 218.91
+      L91.03 218.91 Q97.03 218.91 94.03 213.91
+      Q92.03 209.91 86.03 209.91
+      Q95.31 208.68 95 194Z" fill="#f6efdc" stroke="#44382f" stroke-width="2.2"/>
     <path d="M85.03 214.91 L85.03 217.41 M91.03 214.91 L91.03 217.41" fill="none" stroke="#44382f" stroke-width="1.35"/>
   </g><g data-limb="LF" data-anatomy="left fore / near front" data-phase="0" data-stance="true" data-sole="230">
-    <path d="M176 194 Q173.74 212 181.17 222
-      C175.17 224 175.17 230 183.17 230
-      L196.17 230 Q203.17 230 200.17 225
-      Q198.17 221 191.17 221
-      Q191.74 214 194 194Z" fill="#f6efdc" stroke="#44382f" stroke-width="2.35"/>
+    <path d="M178 194 Q176.74 212 182.17 222
+      C177.17 224 177.17 230 184.17 230
+      L195.17 230 Q201.17 230 198.17 225
+      Q196.17 221 190.17 221
+      Q189.74 214 192 194Z" fill="#f6efdc" stroke="#44382f" stroke-width="2.2"/>
     <path d="M189.17 226 L189.17 228.5 M195.17 226 L195.17 228.5" fill="none" stroke="#44382f" stroke-width="1.35"/>
   </g>
   <g transform="translate(0 0)">
-    <path d="M83 181 C57 181 47 163 50 153.40416305603426 C53 139.40416305603426 64 137.40416305603426 69 147.40416305603426" fill="none" stroke="#44382f" stroke-width="19"/>
-    <path d="M83 181 C57 181 47 163 50 153.40416305603426 C53 139.40416305603426 64 137.40416305603426 69 147.40416305603426" fill="none" stroke="#f6efdc" stroke-width="14"/>
-    <path d="M83 173 C96 156 124 153 146 160 C161 157 180 165 188 180
-      C198 195 189 207 174 210 Q151 216 122 211
-      Q98 216 81 207 C69 199 70 183 83 173Z" fill="#f6efdc" stroke="#44382f" stroke-width="2.6"/>
-    <path d="M100 190 C108 178 131 178 146 187 Q165 197 159 208 Q134 215 110 207Z" fill="#eedfc5" opacity=".82"/>
-    <path d="M85 177 Q90 173 96 173 M80 188 Q79 193 81 196" fill="none" stroke="#b8a78b" stroke-width="1.3" opacity=".72"/>
-    <g transform="rotate(0.45 173 166)">
+    <path d="M83 181 C57 181 47 163 50 153.40416305603426 C53 139.40416305603426 64 137.40416305603426 69 147.40416305603426" fill="none" stroke="#44382f" stroke-width="16"/>
+    <path d="M83 181 C57 181 47 163 50 153.40416305603426 C53 139.40416305603426 64 137.40416305603426 69 147.40416305603426" fill="none" stroke="#f6efdc" stroke-width="11.5"/>
+    <path d="M83 179 C96 165 121 161 144 167 C159 163 178 169 186 182
+      C194 193 188 203 173 206 Q151 210 126 206
+      Q103 213 84 205 C72 200 72 188 83 179Z" fill="#f6efdc" stroke="#44382f" stroke-width="2.45"/>
+    <path d="M102 192 C111 182 130 181 145 188 Q159 195 154 203 Q132 209 112 202Z" fill="#eedfc5" opacity=".72"/>
+    <path d="M86 181 Q91 177 97 177 M81 191 Q80 195 83 198" fill="none" stroke="#b8a78b" stroke-width="1.25" opacity=".65"/>
+    <g transform="rotate(0.45 181 173) translate(181 178) scale(.88) translate(-181 -178)">
       <path d="M139 116 Q139 107 143 94 Q146 86 152 94 L163 108
         Q177 102 191 107 L207 94 Q214 90 214 100 L213 116
         C226 127 232 144 225 159 C219 175 202 185 183 185
@@ -177,43 +177,43 @@
     <path d="M121 192 L123 195" stroke="#f6efdc" stroke-width="1.25"/>
   </g></g><g transform="translate(768 0)" stroke-linecap="round" stroke-linejoin="round" data-frame="3">
   <g data-limb="RH" data-anatomy="right hind / far hind" data-phase="0" data-stance="true" data-sole="230">
-    <path d="M91 193.4 Q91.89 212 90.75 222
-      C84.75 224 84.75 230 92.75 230
-      L105.75 230 Q112.75 230 109.75 225
-      Q107.75 221 100.75 221
-      Q109.89 214 109 193.4Z" fill="#e9e0cc" stroke="#44382f" stroke-width="2.35"/>
+    <path d="M93 193.4 Q94.89 212 91.75 222
+      C86.75 224 86.75 230 93.75 230
+      L104.75 230 Q110.75 230 107.75 225
+      Q105.75 221 99.75 221
+      Q107.89 214 107 193.4Z" fill="#e9e0cc" stroke="#44382f" stroke-width="2.2"/>
     
   </g><g data-limb="RF" data-anatomy="right fore / far front" data-phase="PI" data-stance="false" data-sole="220.02">
-    <path d="M163 193.4 Q162.46 207.21 173.22 212.02
-      C167.22 214.02 167.22 220.02 175.22 220.02
-      L188.22 220.02 Q195.22 220.02 192.22 215.02
-      Q190.22 211.02 183.22 211.02
-      Q180.46 209.21 181 193.4Z" fill="#e9e0cc" stroke="#44382f" stroke-width="2.35"/>
+    <path d="M165 193.4 Q165.46 207.21 174.22 212.02
+      C169.22 214.02 169.22 220.02 176.22 220.02
+      L187.22 220.02 Q193.22 220.02 190.22 215.02
+      Q188.22 211.02 182.22 211.02
+      Q178.46 209.21 179 193.4Z" fill="#e9e0cc" stroke="#44382f" stroke-width="2.2"/>
     
   </g><g data-limb="LH" data-anatomy="left hind / near hind" data-phase="PI" data-stance="false" data-sole="220.02">
-    <path d="M79 193.4 Q83.46 207.21 89.22 212.02
-      C83.22 214.02 83.22 220.02 91.22 220.02
-      L104.22 220.02 Q111.22 220.02 108.22 215.02
-      Q106.22 211.02 99.22 211.02
-      Q101.46 209.21 97 193.4Z" fill="#f6efdc" stroke="#44382f" stroke-width="2.35"/>
+    <path d="M81 193.4 Q86.46 207.21 90.22 212.02
+      C85.22 214.02 85.22 220.02 92.22 220.02
+      L103.22 220.02 Q109.22 220.02 106.22 215.02
+      Q104.22 211.02 98.22 211.02
+      Q99.46 209.21 95 193.4Z" fill="#f6efdc" stroke="#44382f" stroke-width="2.2"/>
     <path d="M97.22 216.02 L97.22 218.52 M103.22 216.02 L103.22 218.52" fill="none" stroke="#44382f" stroke-width="1.35"/>
   </g><g data-limb="LF" data-anatomy="left fore / near front" data-phase="0" data-stance="true" data-sole="230">
-    <path d="M176 193.4 Q171.9 212 175.75 222
-      C169.75 224 169.75 230 177.75 230
-      L190.75 230 Q197.75 230 194.75 225
-      Q192.75 221 185.75 221
-      Q189.9 214 194 193.4Z" fill="#f6efdc" stroke="#44382f" stroke-width="2.35"/>
+    <path d="M178 193.4 Q174.9 212 176.75 222
+      C171.75 224 171.75 230 178.75 230
+      L189.75 230 Q195.75 230 192.75 225
+      Q190.75 221 184.75 221
+      Q187.9 214 192 193.4Z" fill="#f6efdc" stroke="#44382f" stroke-width="2.2"/>
     <path d="M183.75 226 L183.75 228.5 M189.75 226 L189.75 228.5" fill="none" stroke="#44382f" stroke-width="1.35"/>
   </g>
   <g transform="translate(0 -0.6)">
-    <path d="M83 181 C57 181 47 163 50 154.4 C53 140.4 64 138.4 69 148.4" fill="none" stroke="#44382f" stroke-width="19"/>
-    <path d="M83 181 C57 181 47 163 50 154.4 C53 140.4 64 138.4 69 148.4" fill="none" stroke="#f6efdc" stroke-width="14"/>
-    <path d="M83 173 C96 156 124 153 146 160 C161 157 180 165 188 180
-      C198 195 189 207 174 210 Q151 216 122 211
-      Q98 216 81 207 C69 199 70 183 83 173Z" fill="#f6efdc" stroke="#44382f" stroke-width="2.6"/>
-    <path d="M100 190 C108 178 131 178 146 187 Q165 197 159 208 Q134 215 110 207Z" fill="#eedfc5" opacity=".82"/>
-    <path d="M85 177 Q90 173 96 173 M80 188 Q79 193 81 196" fill="none" stroke="#b8a78b" stroke-width="1.3" opacity=".72"/>
-    <g transform="rotate(0.32 173 166)">
+    <path d="M83 181 C57 181 47 163 50 154.4 C53 140.4 64 138.4 69 148.4" fill="none" stroke="#44382f" stroke-width="16"/>
+    <path d="M83 181 C57 181 47 163 50 154.4 C53 140.4 64 138.4 69 148.4" fill="none" stroke="#f6efdc" stroke-width="11.5"/>
+    <path d="M83 179 C96 165 121 161 144 167 C159 163 178 169 186 182
+      C194 193 188 203 173 206 Q151 210 126 206
+      Q103 213 84 205 C72 200 72 188 83 179Z" fill="#f6efdc" stroke="#44382f" stroke-width="2.45"/>
+    <path d="M102 192 C111 182 130 181 145 188 Q159 195 154 203 Q132 209 112 202Z" fill="#eedfc5" opacity=".72"/>
+    <path d="M86 181 Q91 177 97 177 M81 191 Q80 195 83 198" fill="none" stroke="#b8a78b" stroke-width="1.25" opacity=".65"/>
+    <g transform="rotate(0.32 181 173) translate(181 178) scale(.88) translate(-181 -178)">
       <path d="M139 116 Q139 107 143 94 Q146 86 152 94 L163 108
         Q177 102 191 107 L207 94 Q214 90 214 100 L213 116
         C226 127 232 144 225 159 C219 175 202 185 183 185
@@ -236,43 +236,43 @@
     <path d="M121 192 L123 195" stroke="#f6efdc" stroke-width="1.25"/>
   </g></g><g transform="translate(0 256)" stroke-linecap="round" stroke-linejoin="round" data-frame="4">
   <g data-limb="RH" data-anatomy="right hind / far hind" data-phase="0" data-stance="true" data-sole="230">
-    <path d="M91 194 Q90.05 212 85.33 222
-      C79.33 224 79.33 230 87.33 230
-      L100.33 230 Q107.33 230 104.33 225
-      Q102.33 221 95.33 221
-      Q108.05 214 109 194Z" fill="#e9e0cc" stroke="#44382f" stroke-width="2.35"/>
+    <path d="M93 194 Q93.05 212 86.33 222
+      C81.33 224 81.33 230 88.33 230
+      L99.33 230 Q105.33 230 102.33 225
+      Q100.33 221 94.33 221
+      Q106.05 214 107 194Z" fill="#e9e0cc" stroke="#44382f" stroke-width="2.2"/>
     
   </g><g data-limb="RF" data-anatomy="right fore / far front" data-phase="PI" data-stance="true" data-sole="230">
-    <path d="M163 194 Q164.42 212 179 222
-      C173 224 173 230 181 230
-      L194 230 Q201 230 198 225
-      Q196 221 189 221
-      Q182.42 214 181 194Z" fill="#e9e0cc" stroke="#44382f" stroke-width="2.35"/>
+    <path d="M165 194 Q167.42 212 180 222
+      C175 224 175 230 182 230
+      L193 230 Q199 230 196 225
+      Q194 221 188 221
+      Q180.42 214 179 194Z" fill="#e9e0cc" stroke="#44382f" stroke-width="2.2"/>
     
   </g><g data-limb="LH" data-anatomy="left hind / near hind" data-phase="PI" data-stance="true" data-sole="230">
-    <path d="M79 194 Q85.42 212 95 222
-      C89 224 89 230 97 230
-      L110 230 Q117 230 114 225
-      Q112 221 105 221
-      Q103.42 214 97 194Z" fill="#f6efdc" stroke="#44382f" stroke-width="2.35"/>
+    <path d="M81 194 Q88.42 212 96 222
+      C91 224 91 230 98 230
+      L109 230 Q115 230 112 225
+      Q110 221 104 221
+      Q101.42 214 95 194Z" fill="#f6efdc" stroke="#44382f" stroke-width="2.2"/>
     <path d="M103 226 L103 228.5 M109 226 L109 228.5" fill="none" stroke="#44382f" stroke-width="1.35"/>
   </g><g data-limb="LF" data-anatomy="left fore / near front" data-phase="0" data-stance="true" data-sole="230">
-    <path d="M176 194 Q170.05 212 170.33 222
-      C164.33 224 164.33 230 172.33 230
-      L185.33 230 Q192.33 230 189.33 225
-      Q187.33 221 180.33 221
-      Q188.05 214 194 194Z" fill="#f6efdc" stroke="#44382f" stroke-width="2.35"/>
+    <path d="M178 194 Q173.05 212 171.33 222
+      C166.33 224 166.33 230 173.33 230
+      L184.33 230 Q190.33 230 187.33 225
+      Q185.33 221 179.33 221
+      Q186.05 214 192 194Z" fill="#f6efdc" stroke="#44382f" stroke-width="2.2"/>
     <path d="M178.33 226 L178.33 228.5 M184.33 226 L184.33 228.5" fill="none" stroke="#44382f" stroke-width="1.35"/>
   </g>
   <g transform="translate(0 0)">
-    <path d="M83 181 C57 181 47 163 50 153.40416305603426 C53 139.40416305603426 64 137.40416305603426 69 147.40416305603426" fill="none" stroke="#44382f" stroke-width="19"/>
-    <path d="M83 181 C57 181 47 163 50 153.40416305603426 C53 139.40416305603426 64 137.40416305603426 69 147.40416305603426" fill="none" stroke="#f6efdc" stroke-width="14"/>
-    <path d="M83 173 C96 156 124 153 146 160 C161 157 180 165 188 180
-      C198 195 189 207 174 210 Q151 216 122 211
-      Q98 216 81 207 C69 199 70 183 83 173Z" fill="#f6efdc" stroke="#44382f" stroke-width="2.6"/>
-    <path d="M100 190 C108 178 131 178 146 187 Q165 197 159 208 Q134 215 110 207Z" fill="#eedfc5" opacity=".82"/>
-    <path d="M85 177 Q90 173 96 173 M80 188 Q79 193 81 196" fill="none" stroke="#b8a78b" stroke-width="1.3" opacity=".72"/>
-    <g transform="rotate(0 173 166)">
+    <path d="M83 181 C57 181 47 163 50 153.40416305603426 C53 139.40416305603426 64 137.40416305603426 69 147.40416305603426" fill="none" stroke="#44382f" stroke-width="16"/>
+    <path d="M83 181 C57 181 47 163 50 153.40416305603426 C53 139.40416305603426 64 137.40416305603426 69 147.40416305603426" fill="none" stroke="#f6efdc" stroke-width="11.5"/>
+    <path d="M83 179 C96 165 121 161 144 167 C159 163 178 169 186 182
+      C194 193 188 203 173 206 Q151 210 126 206
+      Q103 213 84 205 C72 200 72 188 83 179Z" fill="#f6efdc" stroke="#44382f" stroke-width="2.45"/>
+    <path d="M102 192 C111 182 130 181 145 188 Q159 195 154 203 Q132 209 112 202Z" fill="#eedfc5" opacity=".72"/>
+    <path d="M86 181 Q91 177 97 177 M81 191 Q80 195 83 198" fill="none" stroke="#b8a78b" stroke-width="1.25" opacity=".65"/>
+    <g transform="rotate(0 181 173) translate(181 178) scale(.88) translate(-181 -178)">
       <path d="M139 116 Q139 107 143 94 Q146 86 152 94 L163 108
         Q177 102 191 107 L207 94 Q214 90 214 100 L213 116
         C226 127 232 144 225 159 C219 175 202 185 183 185
@@ -295,43 +295,43 @@
     <path d="M121 192 L123 195" stroke="#f6efdc" stroke-width="1.25"/>
   </g></g><g transform="translate(256 256)" stroke-linecap="round" stroke-linejoin="round" data-frame="5">
   <g data-limb="RH" data-anatomy="right hind / far hind" data-phase="0" data-stance="false" data-sole="227.66">
-    <path d="M91 194.6 Q88.66 210.88 81.25 219.66
-      C75.25 221.66 75.25 227.66 83.25 227.66
-      L96.25 227.66 Q103.25 227.66 100.25 222.66
-      Q98.25 218.66 91.25 218.66
-      Q106.66 212.88 109 194.6Z" fill="#e9e0cc" stroke="#44382f" stroke-width="2.35"/>
+    <path d="M93 194.6 Q91.66 210.88 82.25 219.66
+      C77.25 221.66 77.25 227.66 84.25 227.66
+      L95.25 227.66 Q101.25 227.66 98.25 222.66
+      Q96.25 218.66 90.25 218.66
+      Q104.66 212.88 107 194.6Z" fill="#e9e0cc" stroke="#44382f" stroke-width="2.2"/>
     
   </g><g data-limb="RF" data-anatomy="right fore / far front" data-phase="PI" data-stance="true" data-sole="230">
-    <path d="M163 194.6 Q162.58 212 173.58 222
-      C167.58 224 167.58 230 175.58 230
-      L188.58 230 Q195.58 230 192.58 225
-      Q190.58 221 183.58 221
-      Q180.58 214 181 194.6Z" fill="#e9e0cc" stroke="#44382f" stroke-width="2.35"/>
+    <path d="M165 194.6 Q165.58 212 174.58 222
+      C169.58 224 169.58 230 176.58 230
+      L187.58 230 Q193.58 230 190.58 225
+      Q188.58 221 182.58 221
+      Q178.58 214 179 194.6Z" fill="#e9e0cc" stroke="#44382f" stroke-width="2.2"/>
     
   </g><g data-limb="LH" data-anatomy="left hind / near hind" data-phase="PI" data-stance="true" data-sole="230">
-    <path d="M79 194.6 Q83.58 212 89.58 222
-      C83.58 224 83.58 230 91.58 230
-      L104.58 230 Q111.58 230 108.58 225
-      Q106.58 221 99.58 221
-      Q101.58 214 97 194.6Z" fill="#f6efdc" stroke="#44382f" stroke-width="2.35"/>
+    <path d="M81 194.6 Q86.58 212 90.58 222
+      C85.58 224 85.58 230 92.58 230
+      L103.58 230 Q109.58 230 106.58 225
+      Q104.58 221 98.58 221
+      Q99.58 214 95 194.6Z" fill="#f6efdc" stroke="#44382f" stroke-width="2.2"/>
     <path d="M97.58 226 L97.58 228.5 M103.58 226 L103.58 228.5" fill="none" stroke="#44382f" stroke-width="1.35"/>
   </g><g data-limb="LF" data-anatomy="left fore / near front" data-phase="0" data-stance="false" data-sole="227.66">
-    <path d="M176 194.6 Q168.66 210.88 166.25 219.66
-      C160.25 221.66 160.25 227.66 168.25 227.66
-      L181.25 227.66 Q188.25 227.66 185.25 222.66
-      Q183.25 218.66 176.25 218.66
-      Q186.66 212.88 194 194.6Z" fill="#f6efdc" stroke="#44382f" stroke-width="2.35"/>
+    <path d="M178 194.6 Q171.66 210.88 167.25 219.66
+      C162.25 221.66 162.25 227.66 169.25 227.66
+      L180.25 227.66 Q186.25 227.66 183.25 222.66
+      Q181.25 218.66 175.25 218.66
+      Q184.66 212.88 192 194.6Z" fill="#f6efdc" stroke="#44382f" stroke-width="2.2"/>
     <path d="M174.25 223.66 L174.25 226.16 M180.25 223.66 L180.25 226.16" fill="none" stroke="#44382f" stroke-width="1.35"/>
   </g>
   <g transform="translate(0 0.6)">
-    <path d="M83 181 C57 181 47 163 50 151 C53 137 64 135 69 145" fill="none" stroke="#44382f" stroke-width="19"/>
-    <path d="M83 181 C57 181 47 163 50 151 C53 137 64 135 69 145" fill="none" stroke="#f6efdc" stroke-width="14"/>
-    <path d="M83 173 C96 156 124 153 146 160 C161 157 180 165 188 180
-      C198 195 189 207 174 210 Q151 216 122 211
-      Q98 216 81 207 C69 199 70 183 83 173Z" fill="#f6efdc" stroke="#44382f" stroke-width="2.6"/>
-    <path d="M100 190 C108 178 131 178 146 187 Q165 197 159 208 Q134 215 110 207Z" fill="#eedfc5" opacity=".82"/>
-    <path d="M85 177 Q90 173 96 173 M80 188 Q79 193 81 196" fill="none" stroke="#b8a78b" stroke-width="1.3" opacity=".72"/>
-    <g transform="rotate(-0.32 173 166)">
+    <path d="M83 181 C57 181 47 163 50 151 C53 137 64 135 69 145" fill="none" stroke="#44382f" stroke-width="16"/>
+    <path d="M83 181 C57 181 47 163 50 151 C53 137 64 135 69 145" fill="none" stroke="#f6efdc" stroke-width="11.5"/>
+    <path d="M83 179 C96 165 121 161 144 167 C159 163 178 169 186 182
+      C194 193 188 203 173 206 Q151 210 126 206
+      Q103 213 84 205 C72 200 72 188 83 179Z" fill="#f6efdc" stroke="#44382f" stroke-width="2.45"/>
+    <path d="M102 192 C111 182 130 181 145 188 Q159 195 154 203 Q132 209 112 202Z" fill="#eedfc5" opacity=".72"/>
+    <path d="M86 181 Q91 177 97 177 M81 191 Q80 195 83 198" fill="none" stroke="#b8a78b" stroke-width="1.25" opacity=".65"/>
+    <g transform="rotate(-0.32 181 173) translate(181 178) scale(.88) translate(-181 -178)">
       <path d="M139 116 Q139 107 143 94 Q146 86 152 94 L163 108
         Q177 102 191 107 L207 94 Q214 90 214 100 L213 116
         C226 127 232 144 225 159 C219 175 202 185 183 185
@@ -354,43 +354,43 @@
     <path d="M121 192 L123 195" stroke="#f6efdc" stroke-width="1.25"/>
   </g></g><g transform="translate(512 256)" stroke-linecap="round" stroke-linejoin="round" data-frame="6">
   <g data-limb="RH" data-anatomy="right hind / far hind" data-phase="0" data-stance="false" data-sole="218.91">
-    <path d="M91 194 Q91.31 206.68 89.03 210.91
-      C83.03 212.91 83.03 218.91 91.03 218.91
-      L104.03 218.91 Q111.03 218.91 108.03 213.91
-      Q106.03 209.91 99.03 209.91
-      Q109.31 208.68 109 194Z" fill="#e9e0cc" stroke="#44382f" stroke-width="2.35"/>
+    <path d="M93 194 Q94.31 206.68 90.03 210.91
+      C85.03 212.91 85.03 218.91 92.03 218.91
+      L103.03 218.91 Q109.03 218.91 106.03 213.91
+      Q104.03 209.91 98.03 209.91
+      Q107.31 208.68 107 194Z" fill="#e9e0cc" stroke="#44382f" stroke-width="2.2"/>
     
   </g><g data-limb="RF" data-anatomy="right fore / far front" data-phase="PI" data-stance="true" data-sole="230">
-    <path d="M163 194 Q160.74 212 168.17 222
-      C162.17 224 162.17 230 170.17 230
-      L183.17 230 Q190.17 230 187.17 225
-      Q185.17 221 178.17 221
-      Q178.74 214 181 194Z" fill="#e9e0cc" stroke="#44382f" stroke-width="2.35"/>
+    <path d="M165 194 Q163.74 212 169.17 222
+      C164.17 224 164.17 230 171.17 230
+      L182.17 230 Q188.17 230 185.17 225
+      Q183.17 221 177.17 221
+      Q176.74 214 179 194Z" fill="#e9e0cc" stroke="#44382f" stroke-width="2.2"/>
     
   </g><g data-limb="LH" data-anatomy="left hind / near hind" data-phase="PI" data-stance="true" data-sole="230">
-    <path d="M79 194 Q81.74 212 84.17 222
-      C78.17 224 78.17 230 86.17 230
-      L99.17 230 Q106.17 230 103.17 225
-      Q101.17 221 94.17 221
-      Q99.74 214 97 194Z" fill="#f6efdc" stroke="#44382f" stroke-width="2.35"/>
+    <path d="M81 194 Q84.74 212 85.17 222
+      C80.17 224 80.17 230 87.17 230
+      L98.17 230 Q104.17 230 101.17 225
+      Q99.17 221 93.17 221
+      Q97.74 214 95 194Z" fill="#f6efdc" stroke="#44382f" stroke-width="2.2"/>
     <path d="M92.17 226 L92.17 228.5 M98.17 226 L98.17 228.5" fill="none" stroke="#44382f" stroke-width="1.35"/>
   </g><g data-limb="LF" data-anatomy="left fore / near front" data-phase="0" data-stance="false" data-sole="218.91">
-    <path d="M176 194 Q171.31 206.68 174.03 210.91
-      C168.03 212.91 168.03 218.91 176.03 218.91
-      L189.03 218.91 Q196.03 218.91 193.03 213.91
-      Q191.03 209.91 184.03 209.91
-      Q189.31 208.68 194 194Z" fill="#f6efdc" stroke="#44382f" stroke-width="2.35"/>
+    <path d="M178 194 Q174.31 206.68 175.03 210.91
+      C170.03 212.91 170.03 218.91 177.03 218.91
+      L188.03 218.91 Q194.03 218.91 191.03 213.91
+      Q189.03 209.91 183.03 209.91
+      Q187.31 208.68 192 194Z" fill="#f6efdc" stroke="#44382f" stroke-width="2.2"/>
     <path d="M182.03 214.91 L182.03 217.41 M188.03 214.91 L188.03 217.41" fill="none" stroke="#44382f" stroke-width="1.35"/>
   </g>
   <g transform="translate(0 0)">
-    <path d="M83 181 C57 181 47 163 50 148.59583694396574 C53 134.59583694396574 64 132.59583694396574 69 142.59583694396574" fill="none" stroke="#44382f" stroke-width="19"/>
-    <path d="M83 181 C57 181 47 163 50 148.59583694396574 C53 134.59583694396574 64 132.59583694396574 69 142.59583694396574" fill="none" stroke="#f6efdc" stroke-width="14"/>
-    <path d="M83 173 C96 156 124 153 146 160 C161 157 180 165 188 180
-      C198 195 189 207 174 210 Q151 216 122 211
-      Q98 216 81 207 C69 199 70 183 83 173Z" fill="#f6efdc" stroke="#44382f" stroke-width="2.6"/>
-    <path d="M100 190 C108 178 131 178 146 187 Q165 197 159 208 Q134 215 110 207Z" fill="#eedfc5" opacity=".82"/>
-    <path d="M85 177 Q90 173 96 173 M80 188 Q79 193 81 196" fill="none" stroke="#b8a78b" stroke-width="1.3" opacity=".72"/>
-    <g transform="rotate(-0.45 173 166)">
+    <path d="M83 181 C57 181 47 163 50 148.59583694396574 C53 134.59583694396574 64 132.59583694396574 69 142.59583694396574" fill="none" stroke="#44382f" stroke-width="16"/>
+    <path d="M83 181 C57 181 47 163 50 148.59583694396574 C53 134.59583694396574 64 132.59583694396574 69 142.59583694396574" fill="none" stroke="#f6efdc" stroke-width="11.5"/>
+    <path d="M83 179 C96 165 121 161 144 167 C159 163 178 169 186 182
+      C194 193 188 203 173 206 Q151 210 126 206
+      Q103 213 84 205 C72 200 72 188 83 179Z" fill="#f6efdc" stroke="#44382f" stroke-width="2.45"/>
+    <path d="M102 192 C111 182 130 181 145 188 Q159 195 154 203 Q132 209 112 202Z" fill="#eedfc5" opacity=".72"/>
+    <path d="M86 181 Q91 177 97 177 M81 191 Q80 195 83 198" fill="none" stroke="#b8a78b" stroke-width="1.25" opacity=".65"/>
+    <g transform="rotate(-0.45 181 173) translate(181 178) scale(.88) translate(-181 -178)">
       <path d="M139 116 Q139 107 143 94 Q146 86 152 94 L163 108
         Q177 102 191 107 L207 94 Q214 90 214 100 L213 116
         C226 127 232 144 225 159 C219 175 202 185 183 185
@@ -413,43 +413,43 @@
     <path d="M121 192 L123 195" stroke="#f6efdc" stroke-width="1.25"/>
   </g></g><g transform="translate(768 256)" stroke-linecap="round" stroke-linejoin="round" data-frame="7">
   <g data-limb="RH" data-anatomy="right hind / far hind" data-phase="0" data-stance="false" data-sole="220.02">
-    <path d="M91 193.4 Q95.46 207.21 101.22 212.02
-      C95.22 214.02 95.22 220.02 103.22 220.02
-      L116.22 220.02 Q123.22 220.02 120.22 215.02
-      Q118.22 211.02 111.22 211.02
-      Q113.46 209.21 109 193.4Z" fill="#e9e0cc" stroke="#44382f" stroke-width="2.35"/>
+    <path d="M93 193.4 Q98.46 207.21 102.22 212.02
+      C97.22 214.02 97.22 220.02 104.22 220.02
+      L115.22 220.02 Q121.22 220.02 118.22 215.02
+      Q116.22 211.02 110.22 211.02
+      Q111.46 209.21 107 193.4Z" fill="#e9e0cc" stroke="#44382f" stroke-width="2.2"/>
     
   </g><g data-limb="RF" data-anatomy="right fore / far front" data-phase="PI" data-stance="true" data-sole="230">
-    <path d="M163 193.4 Q158.9 212 162.75 222
-      C156.75 224 156.75 230 164.75 230
-      L177.75 230 Q184.75 230 181.75 225
-      Q179.75 221 172.75 221
-      Q176.9 214 181 193.4Z" fill="#e9e0cc" stroke="#44382f" stroke-width="2.35"/>
+    <path d="M165 193.4 Q161.9 212 163.75 222
+      C158.75 224 158.75 230 165.75 230
+      L176.75 230 Q182.75 230 179.75 225
+      Q177.75 221 171.75 221
+      Q174.9 214 179 193.4Z" fill="#e9e0cc" stroke="#44382f" stroke-width="2.2"/>
     
   </g><g data-limb="LH" data-anatomy="left hind / near hind" data-phase="PI" data-stance="true" data-sole="230">
-    <path d="M79 193.4 Q79.89 212 78.75 222
-      C72.75 224 72.75 230 80.75 230
-      L93.75 230 Q100.75 230 97.75 225
-      Q95.75 221 88.75 221
-      Q97.89 214 97 193.4Z" fill="#f6efdc" stroke="#44382f" stroke-width="2.35"/>
+    <path d="M81 193.4 Q82.89 212 79.75 222
+      C74.75 224 74.75 230 81.75 230
+      L92.75 230 Q98.75 230 95.75 225
+      Q93.75 221 87.75 221
+      Q95.89 214 95 193.4Z" fill="#f6efdc" stroke="#44382f" stroke-width="2.2"/>
     <path d="M86.75 226 L86.75 228.5 M92.75 226 L92.75 228.5" fill="none" stroke="#44382f" stroke-width="1.35"/>
   </g><g data-limb="LF" data-anatomy="left fore / near front" data-phase="0" data-stance="false" data-sole="220.02">
-    <path d="M176 193.4 Q175.46 207.21 186.22 212.02
-      C180.22 214.02 180.22 220.02 188.22 220.02
-      L201.22 220.02 Q208.22 220.02 205.22 215.02
-      Q203.22 211.02 196.22 211.02
-      Q193.46 209.21 194 193.4Z" fill="#f6efdc" stroke="#44382f" stroke-width="2.35"/>
+    <path d="M178 193.4 Q178.46 207.21 187.22 212.02
+      C182.22 214.02 182.22 220.02 189.22 220.02
+      L200.22 220.02 Q206.22 220.02 203.22 215.02
+      Q201.22 211.02 195.22 211.02
+      Q191.46 209.21 192 193.4Z" fill="#f6efdc" stroke="#44382f" stroke-width="2.2"/>
     <path d="M194.22 216.02 L194.22 218.52 M200.22 216.02 L200.22 218.52" fill="none" stroke="#44382f" stroke-width="1.35"/>
   </g>
   <g transform="translate(0 -0.6)">
-    <path d="M83 181 C57 181 47 163 50 147.6 C53 133.6 64 131.6 69 141.6" fill="none" stroke="#44382f" stroke-width="19"/>
-    <path d="M83 181 C57 181 47 163 50 147.6 C53 133.6 64 131.6 69 141.6" fill="none" stroke="#f6efdc" stroke-width="14"/>
-    <path d="M83 173 C96 156 124 153 146 160 C161 157 180 165 188 180
-      C198 195 189 207 174 210 Q151 216 122 211
-      Q98 216 81 207 C69 199 70 183 83 173Z" fill="#f6efdc" stroke="#44382f" stroke-width="2.6"/>
-    <path d="M100 190 C108 178 131 178 146 187 Q165 197 159 208 Q134 215 110 207Z" fill="#eedfc5" opacity=".82"/>
-    <path d="M85 177 Q90 173 96 173 M80 188 Q79 193 81 196" fill="none" stroke="#b8a78b" stroke-width="1.3" opacity=".72"/>
-    <g transform="rotate(-0.32 173 166)">
+    <path d="M83 181 C57 181 47 163 50 147.6 C53 133.6 64 131.6 69 141.6" fill="none" stroke="#44382f" stroke-width="16"/>
+    <path d="M83 181 C57 181 47 163 50 147.6 C53 133.6 64 131.6 69 141.6" fill="none" stroke="#f6efdc" stroke-width="11.5"/>
+    <path d="M83 179 C96 165 121 161 144 167 C159 163 178 169 186 182
+      C194 193 188 203 173 206 Q151 210 126 206
+      Q103 213 84 205 C72 200 72 188 83 179Z" fill="#f6efdc" stroke="#44382f" stroke-width="2.45"/>
+    <path d="M102 192 C111 182 130 181 145 188 Q159 195 154 203 Q132 209 112 202Z" fill="#eedfc5" opacity=".72"/>
+    <path d="M86 181 Q91 177 97 177 M81 191 Q80 195 83 198" fill="none" stroke="#b8a78b" stroke-width="1.25" opacity=".65"/>
+    <g transform="rotate(-0.32 181 173) translate(181 178) scale(.88) translate(-181 -178)">
       <path d="M139 116 Q139 107 143 94 Q146 86 152 94 L163 108
         Q177 102 191 107 L207 94 Q214 90 214 100 L213 116
         C226 127 232 144 225 159 C219 175 202 185 183 185

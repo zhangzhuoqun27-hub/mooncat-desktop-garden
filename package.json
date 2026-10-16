@@ -1,6 +1,6 @@
 {
   "name": "mooncat-desktop-garden",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "private": true,
   "description": "Optional tools for original Mooncat artwork; the Windows app needs no npm runtime.",
   "license": "MIT",
